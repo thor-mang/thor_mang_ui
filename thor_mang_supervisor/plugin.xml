@@ -1,0 +1,17 @@
+<library path="src">
+  <class name="SupervisorWidgetPlugin" type="thor_mang_supervisor.supervisor_widget.SupervisorDialog" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Supvervision GUI plugin for Thor-Mang robot
+    </description>
+    <qtgui>
+      <group>
+        <label>Thor Mang</label>
+        <icon type="theme">folder</icon>
+      </group>
+      <label>Supervisor</label>
+      <icon type="theme">preferences-desktop-keyboard</icon>
+      <statustip>Supvervision GUI plugin for Thor-Mang robot</statustip>
+    </qtgui>
+  </class>
+</library>
+
