@@ -70,7 +70,7 @@ class SupervisorWidget(QObject):
         print "Done!"
 
     def _control_mode_callback(self, control_mode):
-        self.supervisor_widget.robot_mode_status.setText(str(control_mode).upper())
+        self.supervisor_widget.robot_mode_status.setText(str(control_mode.data).upper())
     
     def _handle_send_torque_mode_clicked(self):
         self.torque_on_pub.publish(self.supervisor_widget.torque_on.isChecked())
