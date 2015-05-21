@@ -90,7 +90,7 @@ class SupervisorWidget(QObject):
                 control_mode = self.set_control_mode_client.get_result().result.current_control_mode
                 self.supervisor_widget.robot_mode_status.setText(control_mode.upper())
             else:
-                printf("Didn't received any results. Check communcation!")
+                print("Didn't received any results. Check communcation!")
         else:
-            printf("Can't connect to control mode action server!")
+            print("Can't connect to control mode action server!")
 
