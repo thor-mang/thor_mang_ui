@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import QtCore
 
 import rospy
 import rospkg
@@ -49,6 +50,7 @@ class SupervisorWidget(QObject):
         self.supervisor_widget.send_torque_mode.clicked[bool].connect(self._handle_send_torque_mode_clicked)
         self.supervisor_widget.send_lights_mode.clicked[bool].connect(self._handle_send_lights_mode_clicked)
         self.supervisor_widget.send_control_mode.clicked[bool].connect(self._handle_send_control_mode_clicked)
+        self.supervisor_widget.allow_all_mode_transitions_button.clicked[bool].connect(self._handle_allow_all_mode_transitions_clicked)
 
         # end widget
         widget.setLayout(vbox)
@@ -56,21 +58,35 @@ class SupervisorWidget(QObject):
 
         # init subscribers/action clients
         self.control_mode_sub = rospy.Subscriber("/flor/controller/mode_name", std_msgs.msg.String, self._control_mode_callback)
+        self.allow_all_mode_transitions_status_sub = rospy.Subscriber("/mode_controllers/control_mode_controller/allow_all_mode_transitions_acknowledgement", std_msgs.msg.Bool, self._allow_all_mode_transitions_status_callback)
         self.set_control_mode_client = actionlib.SimpleActionClient("/mode_controllers/control_mode_controller/change_control_mode", ChangeControlModeAction)
 
         # init publisher
         self.torque_on_pub = rospy.Publisher('/thor_mang/torque_on', std_msgs.msg.Bool, queue_size=1)
         self.enable_lights_pub = rospy.Publisher('/thor_mang/enable_lights', std_msgs.msg.Bool, queue_size=1)
+        self.allow_all_mode_transitions_pub = rospy.Publisher('/mode_controllers/control_mode_controller/allow_all_mode_transitions', std_msgs.msg.Bool, queue_size=1)
+
+        self._allow_all_mode_transitions_allowed = False
+
+        self.connect(self, QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._set_transition_mode_status_style)
 
     def shutdown_plugin(self):
         print "Shutting down ..."
         self.control_mode_sub.unregister()
+        self.allow_all_mode_transitions_status_sub.unregister()
         self.torque_on_pub.unregister()
         self.enable_lights_pub.unregister()
         print "Done!"
 
     def _control_mode_callback(self, control_mode):
         self.supervisor_widget.robot_mode_status.setText(str(control_mode.data).upper())
+
+    def _allow_all_mode_transitions_status_callback(self, allowed_msg):
+    	if allowed_msg.data == self._allow_all_mode_transitions_allowed:
+    		self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), "background-color: rgb(150, 255, 150);")
+
+    def _set_transition_mode_status_style(self, style_sheet_string):
+        self.supervisor_widget.allow_all_mode_transitions_status.setStyleSheet(style_sheet_string)
     
     def _handle_send_torque_mode_clicked(self):
         self.torque_on_pub.publish(self.supervisor_widget.torque_on.isChecked())
@@ -93,4 +109,11 @@ class SupervisorWidget(QObject):
                 print("Didn't received any results. Check communcation!")
         else:
             print("Can't connect to control mode action server!")
+
+    def _handle_allow_all_mode_transitions_clicked(self):
+    	self._allow_all_mode_transitions_allowed = not self._allow_all_mode_transitions_allowed
+        self.supervisor_widget.allow_all_mode_transitions_status.setText("all allowed" if self._allow_all_mode_transitions_allowed else "restricted")
+        self.supervisor_widget.allow_all_mode_transitions_button.setText("Restrict" if self._allow_all_mode_transitions_allowed else "Allow All")
+    	self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), "background-color: rgb(255, 150, 150);")
+        self.allow_all_mode_transitions_pub.publish(std_msgs.msg.Bool(self._allow_all_mode_transitions_allowed))
 

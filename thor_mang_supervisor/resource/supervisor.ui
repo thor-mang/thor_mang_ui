@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>351</width>
-    <height>310</height>
+    <width>367</width>
+    <height>378</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -145,7 +145,7 @@
         </property>
         <item>
          <property name="text">
-          <string>NONE</string>
+          <string>STAND_PREP</string>
          </property>
         </item>
         <item>
@@ -155,17 +155,32 @@
         </item>
         <item>
          <property name="text">
+          <string>STAND</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>WHOLE_BODY</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SOFT_STOP</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>STOP</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>STAND_PREP</string>
+          <string>SHUTDOWN</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>STAND</string>
+          <string>STAND_MANIPULATE</string>
          </property>
         </item>
         <item>
@@ -183,20 +198,52 @@
           <string>WALK_MANIPULATE</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>NONE</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="send_control_mode">
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>SEND MODE</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="3,1,1">
+        <item>
+         <widget class="QPushButton" name="send_control_mode">
+          <property name="maximumSize">
+           <size>
+            <width>150</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>SEND MODE</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="allow_all_mode_transitions_status">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(150, 255, 150);</string>
+          </property>
+          <property name="text">
+           <string>restricted</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="allow_all_mode_transitions_button">
+          <property name="text">
+           <string>Allow All</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_8">
