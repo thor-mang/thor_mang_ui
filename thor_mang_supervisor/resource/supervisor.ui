@@ -150,12 +150,12 @@
         </item>
         <item>
          <property name="text">
-          <string>FREEZE</string>
+          <string>STAND</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>STAND</string>
+          <string>FREEZE</string>
          </property>
         </item>
         <item>
@@ -223,7 +223,7 @@
         <item>
          <widget class="QLineEdit" name="allow_all_mode_transitions_status">
           <property name="styleSheet">
-           <string notr="true">background-color: rgb(150, 255, 150);</string>
+           <string notr="true">background-color: rgb(200, 255, 150);</string>
           </property>
           <property name="text">
            <string>restricted</string>
@@ -256,6 +256,9 @@
         </item>
         <item>
          <widget class="QLineEdit" name="robot_mode_status">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(220, 255, 200);</string>
+          </property>
           <property name="text">
            <string>&lt;unknown&gt;</string>
           </property>
