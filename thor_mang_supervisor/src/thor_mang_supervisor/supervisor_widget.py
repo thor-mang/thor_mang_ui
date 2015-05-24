@@ -63,6 +63,11 @@ class SupervisorWidget(QObject):
         self._status_wait_style = "background-color: rgb(255, 255, 150);"
         self._status_error_style = "background-color: rgb(255, 220, 150);"
 
+        # Qt signals
+        self.connect(self, QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._set_transition_mode_status_style)
+        self.connect(self, QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._set_robot_mode_status_style)
+        self.connect(self, QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), self._set_robot_mode_status_text)
+
         # end widget
         widget.setLayout(vbox)
         #context.add_widget(widget)
@@ -81,11 +86,6 @@ class SupervisorWidget(QObject):
         self._allowed_transitions = None
         self._parse_allowed_transitions()
         self._allow_all_mode_transitions_enabled = False
-
-        # Qt signals
-        self.connect(self, QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._set_transition_mode_status_style)
-        self.connect(self, QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._set_robot_mode_status_style)
-        self.connect(self, QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), self._set_robot_mode_status_text)
 
 
     def shutdown_plugin(self):
