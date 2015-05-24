@@ -101,8 +101,8 @@ class SupervisorWidget(QObject):
         self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_ok_style)
 
     def _allow_all_mode_transitions_status_callback(self, allowed_msg):
-        if allowed_msg.data == self._allow_all_mode_transitions_enabled:
-            self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._status_ok_style)
+        self._allow_all_mode_transitions_enabled = allowed_msg.data
+        self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._status_ok_style)
 
     def _parse_allowed_transitions(self):
         if rospy.has_param("/atlas_controller/control_mode_to_controllers"):
