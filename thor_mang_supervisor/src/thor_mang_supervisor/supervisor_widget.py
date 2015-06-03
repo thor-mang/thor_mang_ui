@@ -142,9 +142,18 @@ class SupervisorWidget(QObject):
                     self.supervisor_widget.control_state_list.item(i).setFont(self._inactive_mode_font)
     
     def _handle_send_torque_mode_clicked(self):
-        if self.supervisor_widget.torque_hands.isChecked():
+        if self.supervisor_widget.torque_partial.isChecked():
             torque_selection = std_msgs.msg.Float64MultiArray(data = [0] * 37)
-            torque_selection.data[30:33] = [1] * 4
+            if self.supervisor_widget.torque_hands.isChecked():
+                torque_selection.data[30:33] = [1] * 4
+            if self.supervisor_widget.torque_arms.isChecked():
+                torque_selection.data[0:13] = [1] * 14
+            if self.supervisor_widget.torque_legs.isChecked():
+                torque_selection.data[14:27] = [1] * 14
+            if self.supervisor_widget.torque_head.isChecked():
+                torque_selection.data[28:29] = [1] * 2
+            if self.supervisor_widget.torque_lidar.isChecked():
+                torque_selection.data[36] = 1
             self.torque_hands_pub.publish(torque_selection)
         else:
             self.torque_on_pub.publish(self.supervisor_widget.torque_on.isChecked())
