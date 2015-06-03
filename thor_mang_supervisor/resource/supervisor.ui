@@ -64,6 +64,19 @@
         <property name="text">
          <string>ON</string>
         </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="torque_hands">
+        <property name="text">
+         <string>HANDS ONLY</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item>

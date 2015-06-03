@@ -79,6 +79,7 @@ class SupervisorWidget(QObject):
 
         # init publisher
         self.torque_on_pub = rospy.Publisher('/thor_mang/torque_on', std_msgs.msg.Bool, queue_size=1)
+        self.torque_hands_pub = rospy.Publisher('/thor_mang/torque_id_on', std_msgs.msg.Float64MultiArray, queue_size=1)
         self.enable_lights_pub = rospy.Publisher('/thor_mang/enable_lights', std_msgs.msg.Bool, queue_size=1)
         self.allow_all_mode_transitions_pub = rospy.Publisher('/mode_controllers/control_mode_controller/allow_all_mode_transitions', std_msgs.msg.Bool, queue_size=1)
 
@@ -141,7 +142,12 @@ class SupervisorWidget(QObject):
                     self.supervisor_widget.control_state_list.item(i).setFont(self._inactive_mode_font)
     
     def _handle_send_torque_mode_clicked(self):
-        self.torque_on_pub.publish(self.supervisor_widget.torque_on.isChecked())
+        if self.supervisor_widget.torque_hands.isChecked():
+            torque_selection = std_msgs.msg.Float64MultiArray(data = [0] * 37)
+            torque_selection.data[30:33] = [1] * 4
+            self.torque_hands_pub.publish(torque_selection)
+        else:
+            self.torque_on_pub.publish(self.supervisor_widget.torque_on.isChecked())
 
     def _handle_send_lights_mode_clicked(self):
         self.enable_lights_pub.publish(self.supervisor_widget.lights_on.isChecked())
