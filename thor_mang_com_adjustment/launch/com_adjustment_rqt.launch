@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+
+<launch>
+  <node name="com_adjustment_rqt_widget" pkg="thor_mang_com_adjustment" type="com_adjustment_rqt" output="screen" respawn="false"/>
+</launch>
