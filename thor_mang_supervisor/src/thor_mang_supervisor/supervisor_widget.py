@@ -51,6 +51,7 @@ class SupervisorWidget(QObject):
         self.supervisor_widget.send_lights_mode.clicked[bool].connect(self._handle_send_lights_mode_clicked)
         self.supervisor_widget.send_control_mode.clicked[bool].connect(self._handle_send_control_mode_clicked)
         self.supervisor_widget.allow_all_mode_transitions_button.clicked[bool].connect(self._handle_allow_all_mode_transitions_clicked)
+        self.supervisor_widget.allow_falling_controller_button.clicked[bool].connect(self._handle_allow_falling_controller_clicked) 
 
         # style settings
         self._allowed_transition_color = QColor(0, 0, 0, 255)
@@ -82,11 +83,13 @@ class SupervisorWidget(QObject):
         self.torque_hands_pub = rospy.Publisher('/thor_mang/torque_id_on', std_msgs.msg.Float64MultiArray, queue_size=1)
         self.enable_lights_pub = rospy.Publisher('/thor_mang/enable_lights', std_msgs.msg.Bool, queue_size=1)
         self.allow_all_mode_transitions_pub = rospy.Publisher('/mode_controllers/control_mode_controller/allow_all_mode_transitions', std_msgs.msg.Bool, queue_size=1)
+        self.allow_falling_contoller_pub = rospy.Publisher('/mode_controllers/control_mode_controller/allow_falling_controller', std_msgs.msg.Bool, queue_size=1)
 
         # load transition parameters
         self._allowed_transitions = None
         self._parse_allowed_transitions()
         self._allow_all_mode_transitions_enabled = False
+        self._allow_falling_controller_enabled = False
 
 
     def shutdown_plugin(self):
@@ -190,4 +193,13 @@ class SupervisorWidget(QObject):
         self.supervisor_widget.allow_all_mode_transitions_button.setText("Restrict" if self._allow_all_mode_transitions_enabled else "Allow All")
         self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._status_wait_style)
         self.allow_all_mode_transitions_pub.publish(std_msgs.msg.Bool(self._allow_all_mode_transitions_enabled))
+
+    def _handle_allow_falling_controller_clicked(self):
+        self._allow_falling_controller_enabled = not self._allow_falling_controller_enabled
+        self.supervisor_widget.allow_falling_controller_status.setText("Enabled" if self._allow_falling_controller_enabled else "Disabled")
+        self.supervisor_widget.allow_falling_controller_button.setText("Disable Falling Controller" if self._allow_falling_controller_enabled else "Enable Falling Controller")
+        #self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._status_wait_style)
+        self.allow_falling_contoller_pub.publish(std_msgs.msg.Bool(self._allow_falling_controller_enabled))
+
+
 

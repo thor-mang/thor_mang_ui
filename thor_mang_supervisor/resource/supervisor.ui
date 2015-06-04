@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>527</width>
+    <width>548</width>
     <height>528</height>
    </rect>
   </property>
@@ -370,6 +370,31 @@
           </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>FALLING CONTROLLER:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="allow_falling_controller_status">
+          <property name="text">
+           <string>disabled</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="allow_falling_controller_button">
+          <property name="text">
+           <string>Enable Falling Controller</string>
           </property>
          </widget>
         </item>
