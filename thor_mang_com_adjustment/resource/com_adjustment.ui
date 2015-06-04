@@ -37,10 +37,10 @@
        <item>
         <widget class="QSlider" name="slider_HipPitch">
          <property name="minimum">
-          <number>-314</number>
+          <number>-3000</number>
          </property>
          <property name="maximum">
-          <number>314</number>
+          <number>3000</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -50,10 +50,10 @@
        <item>
         <widget class="QDoubleSpinBox" name="spin_HipPitch">
          <property name="minimum">
-          <double>-3.140000000000000</double>
+          <double>-30.000000000000000</double>
          </property>
          <property name="maximum">
-          <double>3.140000000000000</double>
+          <double>30.000000000000000</double>
          </property>
          <property name="singleStep">
           <double>0.100000000000000</double>
@@ -64,6 +64,12 @@
         <widget class="QDoubleSpinBox" name="spin_CurrentHipPitch">
          <property name="enabled">
           <bool>false</bool>
+         </property>
+         <property name="minimum">
+          <double>-30.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>30.000000000000000</double>
          </property>
         </widget>
        </item>
@@ -81,10 +87,10 @@
        <item>
         <widget class="QSlider" name="slider_AnklePitch">
          <property name="minimum">
-          <number>-314</number>
+          <number>-3000</number>
          </property>
          <property name="maximum">
-          <number>314</number>
+          <number>3000</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -94,10 +100,10 @@
        <item>
         <widget class="QDoubleSpinBox" name="spin_AnklePitch">
          <property name="minimum">
-          <double>-3.140000000000000</double>
+          <double>-30.000000000000000</double>
          </property>
          <property name="maximum">
-          <double>3.140000000000000</double>
+          <double>30.000000000000000</double>
          </property>
          <property name="singleStep">
           <double>0.100000000000000</double>
@@ -108,6 +114,15 @@
         <widget class="QDoubleSpinBox" name="spin_CurrentAnklePitch">
          <property name="enabled">
           <bool>false</bool>
+         </property>
+         <property name="minimum">
+          <double>-30.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>30.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>0.000000000000000</double>
          </property>
         </widget>
        </item>

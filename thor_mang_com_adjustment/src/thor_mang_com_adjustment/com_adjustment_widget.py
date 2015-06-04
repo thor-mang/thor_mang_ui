@@ -83,8 +83,10 @@ class CoMAdjustmentWidget(QObject):
     def _imu_pitch_callback(self, imu_msg):
         rotation = PyKDL.Rotation.Quaternion(imu_msg.orientation.x, imu_msg.orientation.y, imu_msg.orientation.z, imu_msg.orientation.w)
         [roll, pitch, yaw] = rotation.GetRPY()
+        
+        pitch_str = "{0:2.4f}";
 
-        self.com_adjustment_widget.lineEdit_CurrentIMUPitch.setText(str(pitch))
+        self.com_adjustment_widget.lineEdit_CurrentIMUPitch.setText(pitch_str.format(pitch))
         
     def _handle_send_pitch_clicked(self):
         current_pitch_msg = std_msgs.msg.Float64MultiArray(data = [0] * 2)
