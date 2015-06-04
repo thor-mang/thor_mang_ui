@@ -13,7 +13,7 @@ import sensor_msgs.msg
 from rqt_gui_py.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt, QObject
-from python_qt_binding.QtGui import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QComboBox, QColor, QFont
+from python_qt_binding.QtGui import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QComboBox, QColor, QFont, QGraphicsView, QGraphicsScene
 
 import PyKDL
 
@@ -109,3 +109,4 @@ class CoMAdjustmentWidget(QObject):
         self.com_adjustment_widget.slider_AnklePitch.blockSignals(True)
         self.com_adjustment_widget.slider_AnklePitch.setValue(value*100.0)
         self.com_adjustment_widget.slider_AnklePitch.blockSignals(False)
+  
