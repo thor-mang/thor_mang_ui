@@ -1,0 +1,17 @@
+<library path="src">
+  <class name="CoMAdjustmentPlugin" type="thor_mang_com_adjustment.com_adjustment_widget.CoMAdjustmentDialog" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      CoM adjustment GUI plugin for Thor-Mang robot
+    </description>
+    <qtgui>
+      <group>
+        <label>Thor Mang</label>
+        <icon type="theme">folder</icon>
+      </group>
+      <label>Supervisor</label>
+      <icon type="theme">preferences-desktop-keyboard</icon>
+      <statustip>Supvervision GUI plugin for Thor-Mang robot</statustip>
+    </qtgui>
+  </class>
+</library>
+
