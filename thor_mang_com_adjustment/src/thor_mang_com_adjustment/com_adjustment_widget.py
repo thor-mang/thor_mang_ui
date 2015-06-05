@@ -51,13 +51,15 @@ class CoMAdjustmentWidget(QObject):
         vbox.addWidget(self.com_adjustment_widget)
 
         # connect to signals
-        self.com_adjustment_widget.pushButton_Send.clicked[bool].connect(self._handle_send_pitch_clicked)
+        self.com_adjustment_widget.pushButton_Send.clicked.connect(self._handle_send_pitch_clicked)
         self.com_adjustment_widget.slider_HipPitch.valueChanged[int].connect(self._handle_slider_hip_changed)
         self.com_adjustment_widget.slider_AnklePitch.valueChanged[int].connect(self._handle_slider_ankle_changed)
         self.com_adjustment_widget.spin_HipPitch.valueChanged[float].connect(self._handle_spin_hip_changed)
         self.com_adjustment_widget.spin_AnklePitch.valueChanged[float].connect(self._handle_spin_ankle_changed)
         self.com_adjustment_widget.spin_TargetIMUPitch.valueChanged[float].connect(self._handle_target_pitch_changed)
         self.com_adjustment_widget.spin_CurrentIMUPitch.valueChanged[float].connect(self._handle_target_pitch_changed)
+        self.com_adjustment_widget.pushButton_ApplyAdvisedHipPitch.clicked.connect(self._handle_apply_advised_hip_pitch_clicked)
+        self.com_adjustment_widget.pushButton_ApplyAdvisedAnklePitch.clicked.connect(self._handle_apply_advised_ankle_pitch_clicked)        
         
         # end widget
         widget.setLayout(vbox)
@@ -94,7 +96,7 @@ class CoMAdjustmentWidget(QObject):
     def _imu_pitch_callback(self, imu_msg):
         rotation = PyKDL.Rotation.Quaternion(imu_msg.orientation.x, imu_msg.orientation.y, imu_msg.orientation.z, imu_msg.orientation.w)
         [roll, pitch, yaw] = rotation.GetRPY()
-        
+
         self.com_adjustment_widget.spin_CurrentIMUPitch.setValue(pitch)
         
     def _handle_send_pitch_clicked(self):
@@ -124,7 +126,16 @@ class CoMAdjustmentWidget(QObject):
         pitch_diff = self.com_adjustment_widget.spin_CurrentIMUPitch.value() - target_pitch;
         pitch_diff_deg = math.degrees(pitch_diff)
         
-        #self.com_adjustment_widget
+        hip_target_angle = self.com_adjustment_widget.spin_CurrentHipPitch.value() + pitch_diff_deg;
+        self.com_adjustment_widget.spin_AdvisedHipPitch.setValue(hip_target_angle)
         
+        ankle_target_angle = self.com_adjustment_widget.spin_CurrentAnklePitch.value() + pitch_diff_deg;
+        self.com_adjustment_widget.spin_AdvisedAnklePitch.setValue(ankle_target_angle)
+    
+    def _handle_apply_advised_hip_pitch_clicked(self):
+        self.com_adjustment_widget.spin_HipPitch.setValue( self.com_adjustment_widget.spin_AdvisedHipPitch.value() )
         
+    def _handle_apply_advised_ankle_pitch_clicked(self):
+        self.com_adjustment_widget.spin_AnklePitch.setValue( self.com_adjustment_widget.spin_AdvisedAnklePitch.value() )
+
   

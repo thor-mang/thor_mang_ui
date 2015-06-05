@@ -48,6 +48,9 @@
      </item>
      <item row="1" column="1">
       <widget class="QDoubleSpinBox" name="spin_TargetIMUPitch">
+       <property name="decimals">
+        <number>3</number>
+       </property>
        <property name="minimum">
         <double>-3.140000000000000</double>
        </property>
@@ -55,7 +58,7 @@
         <double>3.140000000000000</double>
        </property>
        <property name="singleStep">
-        <double>0.100000000000000</double>
+        <double>0.010000000000000</double>
        </property>
        <property name="value">
         <double>0.220000000000000</double>
@@ -66,6 +69,18 @@
       <widget class="QDoubleSpinBox" name="spin_CurrentIMUPitch">
        <property name="enabled">
         <bool>false</bool>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>-3.140000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>3.140000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.010000000000000</double>
        </property>
       </widget>
      </item>
@@ -97,6 +112,9 @@
        </item>
        <item>
         <widget class="QDoubleSpinBox" name="spin_HipPitch">
+         <property name="suffix">
+          <string>°</string>
+         </property>
          <property name="minimum">
           <double>-30.000000000000000</double>
          </property>
@@ -112,6 +130,9 @@
         <widget class="QDoubleSpinBox" name="spin_CurrentHipPitch">
          <property name="enabled">
           <bool>false</bool>
+         </property>
+         <property name="suffix">
+          <string>°</string>
          </property>
          <property name="minimum">
           <double>-30.000000000000000</double>
@@ -139,10 +160,20 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="spin_advisedHipPitch"/>
+        <widget class="QDoubleSpinBox" name="spin_AdvisedHipPitch">
+         <property name="suffix">
+          <string>°</string>
+         </property>
+         <property name="minimum">
+          <double>-360.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>360.000000000000000</double>
+         </property>
+        </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btn_applyAdvisedHip">
+        <widget class="QPushButton" name="pushButton_ApplyAdvisedHipPitch">
          <property name="text">
           <string>Apply</string>
          </property>
@@ -161,6 +192,9 @@
        </item>
        <item>
         <widget class="QDoubleSpinBox" name="spin_AnklePitch">
+         <property name="suffix">
+          <string>°</string>
+         </property>
          <property name="minimum">
           <double>-30.000000000000000</double>
          </property>
@@ -176,6 +210,9 @@
         <widget class="QDoubleSpinBox" name="spin_CurrentAnklePitch">
          <property name="enabled">
           <bool>false</bool>
+         </property>
+         <property name="suffix">
+          <string>°</string>
          </property>
          <property name="minimum">
           <double>-30.000000000000000</double>
@@ -206,10 +243,20 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="spin_advisedAnklePitch"/>
+        <widget class="QDoubleSpinBox" name="spin_AdvisedAnklePitch">
+         <property name="suffix">
+          <string>°</string>
+         </property>
+         <property name="minimum">
+          <double>-360.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>360.000000000000000</double>
+         </property>
+        </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btn_applyAdvisedPitch">
+        <widget class="QPushButton" name="pushButton_ApplyAdvisedAnklePitch">
          <property name="text">
           <string>Apply</string>
          </property>
