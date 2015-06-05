@@ -126,7 +126,7 @@ class CoMAdjustmentWidget(QObject):
         pitch_diff = self.com_adjustment_widget.spin_CurrentIMUPitch.value() - target_pitch;
         pitch_diff_deg = math.degrees(pitch_diff)
         
-        hip_target_angle = self.com_adjustment_widget.spin_CurrentHipPitch.value() + pitch_diff_deg;
+        hip_target_angle = self.com_adjustment_widget.spin_CurrentHipPitch.value() - pitch_diff_deg;
         self.com_adjustment_widget.spin_AdvisedHipPitch.setValue(hip_target_angle)
         
         ankle_target_angle = self.com_adjustment_widget.spin_CurrentAnklePitch.value() + pitch_diff_deg;
