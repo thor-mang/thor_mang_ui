@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>538</width>
-    <height>276</height>
+    <height>278</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -61,7 +61,7 @@
         <double>0.010000000000000</double>
        </property>
        <property name="value">
-        <double>0.220000000000000</double>
+        <double>0.210000000000000</double>
        </property>
       </widget>
      </item>
@@ -124,6 +124,9 @@
          <property name="singleStep">
           <double>0.100000000000000</double>
          </property>
+         <property name="value">
+          <double>12.000000000000000</double>
+         </property>
         </widget>
        </item>
        <item>
@@ -140,6 +143,9 @@
          <property name="maximum">
           <double>30.000000000000000</double>
          </property>
+         <property name="value">
+          <double>12.000000000000000</double>
+         </property>
         </widget>
        </item>
       </layout>
@@ -153,6 +159,9 @@
          </property>
          <property name="maximum">
           <number>3000</number>
+         </property>
+         <property name="sliderPosition">
+          <number>1200</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
