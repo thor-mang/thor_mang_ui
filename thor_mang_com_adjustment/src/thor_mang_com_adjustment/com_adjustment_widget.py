@@ -9,6 +9,7 @@ import actionlib
 
 import std_msgs.msg
 import sensor_msgs.msg
+import math
 
 from rqt_gui_py.plugin import Plugin
 from python_qt_binding import loadUi
@@ -55,7 +56,8 @@ class CoMAdjustmentWidget(QObject):
         self.com_adjustment_widget.slider_AnklePitch.valueChanged[int].connect(self._handle_slider_ankle_changed)
         self.com_adjustment_widget.spin_HipPitch.valueChanged[float].connect(self._handle_spin_hip_changed)
         self.com_adjustment_widget.spin_AnklePitch.valueChanged[float].connect(self._handle_spin_ankle_changed)
-        self.com_adjustment_widget.lineEdit_TargetIMUPitch.textChanged
+        self.com_adjustment_widget.spin_TargetIMUPitch.valueChanged[float].connect(self._handle_target_pitch_changed)
+        self.com_adjustment_widget.spin_CurrentIMUPitch.valueChanged[float].connect(self._handle_target_pitch_changed)
         
         # end widget
         widget.setLayout(vbox)
@@ -68,7 +70,6 @@ class CoMAdjustmentWidget(QObject):
         # init publisher
         self.pitch_values_pub = rospy.Publisher("/thor_mang/step_controller/pitch_offset", std_msgs.msg.Float64MultiArray, queue_size=1)
         self.got_init_values = False
-        self.target_imu = 0.0
 
     def shutdown_plugin(self):
         print "Shutting down ..."
@@ -94,9 +95,7 @@ class CoMAdjustmentWidget(QObject):
         rotation = PyKDL.Rotation.Quaternion(imu_msg.orientation.x, imu_msg.orientation.y, imu_msg.orientation.z, imu_msg.orientation.w)
         [roll, pitch, yaw] = rotation.GetRPY()
         
-        pitch_str = "{0:2.4f}"
-
-        self.com_adjustment_widget.lineEdit_CurrentIMUPitch.setText(pitch_str.format(pitch))
+        self.com_adjustment_widget.spin_CurrentIMUPitch.setValue(pitch)
         
     def _handle_send_pitch_clicked(self):
         current_pitch_msg = std_msgs.msg.Float64MultiArray(data=[0] * 2)
@@ -119,4 +118,13 @@ class CoMAdjustmentWidget(QObject):
         self.com_adjustment_widget.slider_AnklePitch.blockSignals(True)
         self.com_adjustment_widget.slider_AnklePitch.setValue(value*100.0)
         self.com_adjustment_widget.slider_AnklePitch.blockSignals(False)
+        
+    def _handle_target_pitch_changed(self, value):
+        target_pitch = self.com_adjustment_widget.spin_TargetIMUPitch.value()
+        pitch_diff = self.com_adjustment_widget.spin_CurrentIMUPitch.value() - target_pitch;
+        pitch_diff_deg = math.degrees(pitch_diff)
+        
+        #self.com_adjustment_widget
+        
+        
   
