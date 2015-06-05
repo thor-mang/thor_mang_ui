@@ -66,6 +66,7 @@ class SupervisorWidget(QObject):
 
         # Qt signals
         self.connect(self, QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._set_transition_mode_status_style)
+        self.connect(self, QtCore.SIGNAL('setFallingControllerStatusStyle(PyQt_PyObject)'), self._set_falling_controller_status_style)
         self.connect(self, QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._set_robot_mode_status_style)
         self.connect(self, QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), self._set_robot_mode_status_text)
 
@@ -76,6 +77,7 @@ class SupervisorWidget(QObject):
         # init subscribers/action clients
         self.control_mode_sub = rospy.Subscriber("/flor/controller/mode_name", std_msgs.msg.String, self._control_mode_callback)
         self.allow_all_mode_transitions_status_sub = rospy.Subscriber("/mode_controllers/control_mode_controller/allow_all_mode_transitions_acknowledgement", std_msgs.msg.Bool, self._allow_all_mode_transitions_status_callback)
+        self.allow_falling_controller_status_sub = rospy.Subscriber("/mode_controllers/control_mode_controller/allow_falling_controller_acknowledgement", std_msgs.msg.Bool, self._allow_falling_controller_status_callback)
         self.set_control_mode_client = actionlib.SimpleActionClient("/mode_controllers/control_mode_controller/change_control_mode", ChangeControlModeAction)
 
         # init publisher
@@ -104,6 +106,10 @@ class SupervisorWidget(QObject):
         self.emit(QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), str(control_mode.data))
         self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_ok_style)
 
+    def _allow_falling_controller_status_callback(self, allowed_msg):
+        self._allow_falling_controller_enabled = allowed_msg.data
+        self.emit(QtCore.SIGNAL('setFallingControllerStatusStyle(PyQt_PyObject)'), self._status_ok_style)
+
     def _allow_all_mode_transitions_status_callback(self, allowed_msg):
         self._allow_all_mode_transitions_enabled = allowed_msg.data
         self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._status_ok_style)
@@ -123,6 +129,9 @@ class SupervisorWidget(QObject):
 
     def _set_transition_mode_status_style(self, style_sheet_string):
         self.supervisor_widget.allow_all_mode_transitions_status.setStyleSheet(style_sheet_string)
+
+    def _set_falling_controller_status_style(self, style_sheet_string):
+        self.supervisor_widget.allow_falling_controller_status.setStyleSheet(style_sheet_string)
 
     def _set_robot_mode_status_style(self, style_sheet_string):
         self.supervisor_widget.robot_mode_status.setStyleSheet(style_sheet_string)
@@ -198,7 +207,7 @@ class SupervisorWidget(QObject):
         self._allow_falling_controller_enabled = not self._allow_falling_controller_enabled
         self.supervisor_widget.allow_falling_controller_status.setText("Enabled" if self._allow_falling_controller_enabled else "Disabled")
         self.supervisor_widget.allow_falling_controller_button.setText("Disable Falling Controller" if self._allow_falling_controller_enabled else "Enable Falling Controller")
-        #self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._status_wait_style)
+        self.emit(QtCore.SIGNAL('setFallingControllerStatusStyle(PyQt_PyObject)'), self._status_wait_style)
         self.allow_falling_contoller_pub.publish(std_msgs.msg.Bool(self._allow_falling_controller_enabled))
 
 

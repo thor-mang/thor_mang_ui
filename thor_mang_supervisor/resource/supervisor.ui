@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>548</width>
-    <height>528</height>
+    <height>535</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -386,6 +386,9 @@
         </item>
         <item>
          <widget class="QLineEdit" name="allow_falling_controller_status">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(200, 255, 150);</string>
+          </property>
           <property name="text">
            <string>disabled</string>
           </property>
