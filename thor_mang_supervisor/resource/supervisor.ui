@@ -296,6 +296,11 @@
         </item>
         <item>
          <property name="text">
+          <string>MANIPULATE_COMPLIANT_ADMITTANCE</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>WALK</string>
          </property>
         </item>
