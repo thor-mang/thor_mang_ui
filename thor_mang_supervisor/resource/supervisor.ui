@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>548</width>
-    <height>605</height>
+    <height>629</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,7 +22,7 @@
   <property name="windowTitle">
    <string>ThorMangSupervisor</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0,0,0,0,0,1,0,0,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0,0,0,0,0,1,0,0,0,0">
    <item>
     <widget class="Line" name="line_3">
      <property name="orientation">
@@ -296,11 +296,6 @@
         </item>
         <item>
          <property name="text">
-          <string>MANIPULATE_COMPLIANT_ADMITTANCE</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string>WALK</string>
          </property>
         </item>
@@ -523,13 +518,6 @@
        </widget>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line_5">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
     </widget>
    </item>
    <item>
