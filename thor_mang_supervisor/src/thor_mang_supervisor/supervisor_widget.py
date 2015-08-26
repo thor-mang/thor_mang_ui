@@ -16,6 +16,9 @@ from python_qt_binding.QtGui import QWidget, QHBoxLayout, QVBoxLayout, QPushButt
 
 from vigir_humanoid_control_msgs.msg import ChangeControlModeAction, ChangeControlModeGoal, ChangeControlModeResult
 
+ft_sensor_names = ['r_hand', 'l_hand', 'r_foot', 'l_foot']
+
+
 class SupervisorDialog(Plugin):
 
     def __init__(self, context):
@@ -29,6 +32,7 @@ class SupervisorDialog(Plugin):
 
     def shutdown_plugin(self):
         self._widget.shutdown_plugin()
+
 
 class SupervisorWidget(QObject):
 
@@ -51,7 +55,10 @@ class SupervisorWidget(QObject):
         self.supervisor_widget.send_lights_mode.clicked[bool].connect(self._handle_send_lights_mode_clicked)
         self.supervisor_widget.send_control_mode.clicked[bool].connect(self._handle_send_control_mode_clicked)
         self.supervisor_widget.allow_all_mode_transitions_button.clicked[bool].connect(self._handle_allow_all_mode_transitions_clicked)
-        self.supervisor_widget.allow_falling_controller_button.clicked[bool].connect(self._handle_allow_falling_controller_clicked) 
+        self.supervisor_widget.allow_falling_controller_button.clicked[bool].connect(self._handle_allow_falling_controller_clicked)
+
+        for sensor in ft_sensor_names:
+            getattr(self.supervisor_widget, 'reset_' + sensor + '_button').clicked.connect(lambda x, _sensor=sensor: self._handle_reset_ft_clicked(x, _sensor))
 
         # style settings
         self._allowed_transition_color = QColor(0, 0, 0, 255)
@@ -72,7 +79,6 @@ class SupervisorWidget(QObject):
 
         # end widget
         widget.setLayout(vbox)
-        #context.add_widget(widget)
 
         # init subscribers/action clients
         self.control_mode_sub = rospy.Subscriber("/flor/controller/mode_name", std_msgs.msg.String, self._control_mode_callback)
@@ -85,14 +91,17 @@ class SupervisorWidget(QObject):
         self.torque_hands_pub = rospy.Publisher('/thor_mang/torque_id_on', std_msgs.msg.Float64MultiArray, queue_size=1)
         self.enable_lights_pub = rospy.Publisher('/thor_mang/enable_lights', std_msgs.msg.Bool, queue_size=1)
         self.allow_all_mode_transitions_pub = rospy.Publisher('/mode_controllers/control_mode_controller/allow_all_mode_transitions', std_msgs.msg.Bool, queue_size=1)
-        self.allow_falling_contoller_pub = rospy.Publisher('/mode_controllers/control_mode_controller/allow_falling_controller', std_msgs.msg.Bool, queue_size=1)
+        self.allow_falling_controller_pub = rospy.Publisher('/mode_controllers/control_mode_controller/allow_falling_controller', std_msgs.msg.Bool, queue_size=1)
+
+        self.reset_ft_pub = dict()
+        for sensor in ft_sensor_names:
+            self.reset_ft_pub[sensor] = rospy.Publisher('thor_mang/reset_ft/' + sensor, std_msgs.msg.Empty, queue_size=100)
 
         # load transition parameters
         self._allowed_transitions = None
         self._parse_allowed_transitions()
         self._allow_all_mode_transitions_enabled = False
         self._allow_falling_controller_enabled = False
-
 
     def shutdown_plugin(self):
         print "Shutting down ..."
@@ -146,7 +155,7 @@ class SupervisorWidget(QObject):
                 if target_mode == new_mode:
                     self.supervisor_widget.control_state_list.item(i).setFont(self._active_mode_font)
                     self.supervisor_widget.control_state_list.item(i).setTextColor(self._allowed_transition_color)
-                elif has_defined_transitions and not target_mode in self._allowed_transitions[new_mode]:
+                elif has_defined_transitions and target_mode not in self._allowed_transitions[new_mode]:
                     self.supervisor_widget.control_state_list.item(i).setTextColor(self._forbidden_transition_color)
                     self.supervisor_widget.control_state_list.item(i).setFont(self._inactive_mode_font)
                 else:
@@ -177,7 +186,7 @@ class SupervisorWidget(QObject):
         if self._allowed_transitions is None:
             self._parse_allowed_transitions()
 
-        if (self.set_control_mode_client.wait_for_server(rospy.Duration(0.5))):
+        if self.set_control_mode_client.wait_for_server(rospy.Duration(0.5)):
             self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_wait_style)
             goal = ChangeControlModeGoal()
             goal.mode_request = self.supervisor_widget.control_state_list.currentItem().text().lower()
@@ -186,7 +195,7 @@ class SupervisorWidget(QObject):
 
             # waiting for getting list of parameter set names
             action_timeout = rospy.Duration(1.0)
-            if (self.set_control_mode_client.wait_for_result(action_timeout)):
+            if self.set_control_mode_client.wait_for_result(action_timeout):
                 control_mode = self.set_control_mode_client.get_result().result.current_control_mode
                 self.emit(QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), str(control_mode))
                 self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_ok_style)
@@ -208,7 +217,13 @@ class SupervisorWidget(QObject):
         self.supervisor_widget.allow_falling_controller_status.setText("Enabled" if self._allow_falling_controller_enabled else "Disabled")
         self.supervisor_widget.allow_falling_controller_button.setText("Disable Falling Controller" if self._allow_falling_controller_enabled else "Enable Falling Controller")
         self.emit(QtCore.SIGNAL('setFallingControllerStatusStyle(PyQt_PyObject)'), self._status_wait_style)
-        self.allow_falling_contoller_pub.publish(std_msgs.msg.Bool(self._allow_falling_controller_enabled))
+        self.allow_falling_controller_pub.publish(std_msgs.msg.Bool(self._allow_falling_controller_enabled))
+
+    def _handle_reset_ft_clicked(self, status, sensor):
+        self.reset_ft(sensor)
+
+    def reset_ft(self, sensor):
+        self.reset_ft_pub[sensor].publish(std_msgs.msg.Empty())
 
 
 

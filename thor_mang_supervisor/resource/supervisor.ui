@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>548</width>
-    <height>535</height>
+    <height>605</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,7 +22,7 @@
   <property name="windowTitle">
    <string>ThorMangSupervisor</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0,0,0,0,0,1,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0,0,0,0,0,1,0,0,0,0,0">
    <item>
     <widget class="Line" name="line_3">
      <property name="orientation">
@@ -474,6 +474,54 @@
    </item>
    <item>
     <widget class="Line" name="line_4">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="reset_ft" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QLabel" name="ft_sensor_reset_label">
+        <property name="text">
+         <string>FT SENSOR RESET</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="reset_r_hand_button">
+        <property name="text">
+         <string>Right hand</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="reset_l_hand_button">
+        <property name="text">
+         <string>Left hand</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="reset_r_foot_button">
+        <property name="text">
+         <string>Right foot</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="reset_l_foot_button">
+        <property name="text">
+         <string>Left foot</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_5">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
