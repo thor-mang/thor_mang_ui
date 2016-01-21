@@ -66,7 +66,7 @@ class CoMAdjustmentWidget(QObject):
        # context.add_widget(widget)
 
         # init subscribers/action clients
-        self.imu_pitch_sub = rospy.Subscriber("/thor_mang/pelvis_imu_throttle", sensor_msgs.msg.Imu, self._imu_pitch_callback)
+        self.imu_pitch_sub = rospy.Subscriber("/thor_mang/pelvis_imu", sensor_msgs.msg.Imu, self._imu_pitch_callback)
         self.pitch_values_ack_sub = rospy.Subscriber("/thor_mang/step_controller/current_pitch_offset", std_msgs.msg.Float64MultiArray, self._pitch_values_ack_callback)
         
         # init publisher
