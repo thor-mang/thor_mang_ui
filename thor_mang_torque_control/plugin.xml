@@ -1,0 +1,16 @@
+<library path="src">
+  <class name="TorqueControlWidgetPlugin" type="thor_mang_torque_control.torque_control_widget.TorqueControlDialog" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Torque Control GUI plugin for Thor Mang robot
+    </description>
+    <qtgui>
+      <group>
+        <label>Thor Mang</label>
+        <icon type="theme">folder</icon>
+      </group>
+      <label>Torque Control</label>
+      <icon type="theme">preferences-desktop-keyboard</icon>
+      <statustip>Torque Control GUI plugin for Thor Mang robot</statustip>
+    </qtgui>
+  </class>
+</library>
