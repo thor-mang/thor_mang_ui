@@ -56,7 +56,7 @@ class TorqueControlWidget(QObject):
         widget.setLayout(vbox)
 
         # init publishers
-        self.torque_pub = rospy.Publisher("robotis/sync_write_item", SyncWriteItem, queue_size=1000)
+        self.torque_pub = rospy.Publisher("/johnny5/robotis/sync_write_item", SyncWriteItem, queue_size=1000)
 
     @staticmethod
     def iter_items(list_widget):
