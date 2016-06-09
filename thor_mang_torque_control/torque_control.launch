@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!--Provide option to set namespace from outside-->
+  <arg name="namespace" default="/jonny5"/>
+
+
+  <group ns="$(arg namespace)">
+    <node name="thor_mang_torque_control" pkg="thor_mang_torque_control" type="torque_control_rqt" respawn="false" output="screen" />
+
+  <!--Load joints-->
+    <rosparam command="load" file="$(find thor_mang_torque_control)/config/thormang3_joint_groups.yaml"/>
+    <rosparam command="load" file="$(find thor_mang_torque_control)/config/thormang3_joint_list.yaml"/>
+  </group>
+</launch> 
