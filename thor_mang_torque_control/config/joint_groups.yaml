@@ -1,0 +1,21 @@
+groups:
+  - right_arm
+  - left_arm
+  - right_leg
+  - left_leg
+  
+right_arm:
+  prefix: r_arm
+  name: "Right Arm"
+  
+left_arm:
+   prefix: l_arm
+   name: "Left Arm"
+   
+right_leg:
+  prefix: r_leg
+  name: "Right Leg"
+   
+left_leg:
+  prefix: l_leg
+  name: "Left Leg"
