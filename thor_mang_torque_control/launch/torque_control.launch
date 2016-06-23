@@ -2,7 +2,7 @@
 
 <launch>
   <!--Provide option to set namespace from outside-->
-  <arg name="namespace" default="/jonny5"/>
+  <arg name="namespace" default="/johnny5"/>
 
 
   <group ns="$(arg namespace)">
