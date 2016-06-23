@@ -27,3 +27,8 @@ joint_list:
   - l_leg_an_r
   - torso_y
   - head_y
+  - head_lidar_spinning_joint
+  - l_f0_j0
+  - r_f0_j0
+  - l_f1_j0
+  - r_f1_j0
