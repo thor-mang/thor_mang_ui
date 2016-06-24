@@ -24,26 +24,61 @@
     <layout class="QHBoxLayout" name="appendage_layout"/>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="button_layout">
+    <layout class="QVBoxLayout" name="button_layout">
      <item>
-      <widget class="QPushButton" name="send_torque">
-       <property name="text">
-        <string>Send</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="send_button_layout">
+       <item>
+        <widget class="QPushButton" name="select_all_button">
+         <property name="text">
+          <string>Select All</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="deselect_button">
+         <property name="text">
+          <string>Deselect</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </item>
      <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+      <layout class="QHBoxLayout" name="select_buttons_layout">
+       <item>
+        <widget class="QPushButton" name="send_torque">
+         <property name="text">
+          <string>Send</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

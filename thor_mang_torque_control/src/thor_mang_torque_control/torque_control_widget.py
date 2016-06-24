@@ -55,6 +55,9 @@ class TorqueControlWidget(QObject):
 
         # connect to signals
         self.torque_control_widget.send_torque.clicked[bool].connect(self._handle_send_torque_clicked)
+        self.torque_control_widget.select_all_button.clicked[bool].connect(self._handle_select_all_button_clicked)
+        self.torque_control_widget.deselect_button.clicked[bool].connect(self._handle_deselect_button_clicked)
+
 
         # Qt signals
         # self.connect(self, QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._set_transition_mode_status_style)
@@ -112,6 +115,14 @@ class TorqueControlWidget(QObject):
                 else:
                     msg.value.append(0)
         self.torque_pub.publish(msg)
+
+    def _handle_select_all_button_clicked(self):
+        for widget in self.appendage_widgets:
+            self._handle_select_all_clicked(widget)
+
+    def _handle_deselect_button_clicked(self):
+        for widget in self.appendage_widgets:
+            self._handle_deselect_clicked(widget)
 
     def _handle_select_all_clicked(self, widget):
         for item in self.iter_items(widget.list):
