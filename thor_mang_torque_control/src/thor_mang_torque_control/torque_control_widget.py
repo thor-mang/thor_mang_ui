@@ -9,7 +9,7 @@ from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt, QObject
 from python_qt_binding.QtGui import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QComboBox, QColor, QFont, QListWidgetItem
 
-from robotis_controller_msgs.msg import SyncWriteItem
+from robotis_controller_msgs.msg import SyncWriteItem, RebootDevice
 
 
 class TorqueControlDialog(Plugin):
@@ -55,6 +55,7 @@ class TorqueControlWidget(QObject):
 
         # connect to signals
         self.torque_control_widget.send_torque.clicked[bool].connect(self._handle_send_torque_clicked)
+        self.torque_control_widget.send_reboot.clicked[bool].connect(self._handle_send_reboot_clicked)
         self.torque_control_widget.select_all_button.clicked[bool].connect(self._handle_select_all_button_clicked)
         self.torque_control_widget.deselect_button.clicked[bool].connect(self._handle_deselect_button_clicked)
 
@@ -67,6 +68,7 @@ class TorqueControlWidget(QObject):
 
         # init publishers
         self.torque_pub = rospy.Publisher("robotis/sync_write_item", SyncWriteItem, queue_size=1000)
+        self.reboot_pub = rospy.Publisher("robotis/reboot_device", RebootDevice, queue_size=1000)
 
     def load_groups(self):
         groups = rospy.get_param("groups", [])
@@ -100,8 +102,8 @@ class TorqueControlWidget(QObject):
                 self.add_joint_to_list(joint, widget)
 
     def connect_select_button_signals(self, widget):
-        widget.select_all_button.clicked[bool].connect(lambda : self._handle_select_all_clicked(widget))
-        widget.deselect_button.clicked[bool].connect(lambda : self._handle_deselect_clicked(widget))
+        widget.select_all_button.clicked[bool].connect(lambda: self._handle_select_all_clicked(widget))
+        widget.deselect_button.clicked[bool].connect(lambda: self._handle_deselect_clicked(widget))
 
     def _handle_send_torque_clicked(self):
         msg = SyncWriteItem()
@@ -115,6 +117,15 @@ class TorqueControlWidget(QObject):
                 else:
                     msg.value.append(0)
         self.torque_pub.publish(msg)
+
+    def _handle_send_reboot_clicked(self):
+        msg = RebootDevice()
+        for widget in self.appendage_widgets:
+            for item in self.iter_items(widget.list):
+                state = item.checkState()
+                if state == Qt.Checked:
+                    msg.joint_name.append(item.text())
+        self.reboot_pub.publish(msg)
 
     def _handle_select_all_button_clicked(self):
         for widget in self.appendage_widgets:

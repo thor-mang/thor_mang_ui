@@ -61,7 +61,7 @@
        <item>
         <widget class="QPushButton" name="send_torque">
          <property name="text">
-          <string>Send</string>
+          <string>Send torque</string>
          </property>
         </widget>
        </item>
@@ -77,6 +77,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="send_reboot">
+         <property name="text">
+          <string>Send reboot</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
