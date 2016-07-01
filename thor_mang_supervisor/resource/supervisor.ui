@@ -171,12 +171,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="torque_lidar">
+      <widget class="QCheckBox" name="torque_misc">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>LIDAR</string>
+        <string>MISC</string>
        </property>
       </widget>
      </item>
@@ -249,71 +249,6 @@
           <height>16777215</height>
          </size>
         </property>
-        <item>
-         <property name="text">
-          <string>STAND_PREP</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>STAND</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>FREEZE</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>WHOLE_BODY</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>SOFT_STOP</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>STOP</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>SHUTDOWN</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>STAND_MANIPULATE</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>MANIPULATE</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>MANIPULATE_COMPLIANT_ADMITTANCE</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>WALK</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>WALK_MANIPULATE</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>NONE</string>
-         </property>
-        </item>
        </widget>
       </item>
       <item>
@@ -375,34 +310,6 @@
           </property>
           <property name="readOnly">
            <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>FALLING CONTROLLER:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="allow_falling_controller_status">
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(200, 255, 150);</string>
-          </property>
-          <property name="text">
-           <string>disabled</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="allow_falling_controller_button">
-          <property name="text">
-           <string>Enable Falling Controller</string>
           </property>
          </widget>
         </item>
@@ -495,13 +402,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="reset_r_hand_button">
-        <property name="text">
-         <string>Right hand</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="reset_l_hand_button">
         <property name="text">
          <string>Left hand</string>
@@ -509,9 +409,9 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="reset_r_foot_button">
+       <widget class="QPushButton" name="reset_r_hand_button">
         <property name="text">
-         <string>Right foot</string>
+         <string>Right hand</string>
         </property>
        </widget>
       </item>
@@ -519,6 +419,13 @@
        <widget class="QPushButton" name="reset_l_foot_button">
         <property name="text">
          <string>Left foot</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="reset_r_foot_button">
+        <property name="text">
+         <string>Right foot</string>
         </property>
        </widget>
       </item>
@@ -628,7 +535,7 @@
   <connection>
    <sender>torque_partial</sender>
    <signal>toggled(bool)</signal>
-   <receiver>torque_lidar</receiver>
+   <receiver>torque_misc</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

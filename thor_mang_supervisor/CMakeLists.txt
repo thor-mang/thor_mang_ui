@@ -7,7 +7,7 @@ project(thor_mang_supervisor)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS rospy rqt_gui rqt_gui_py actionlib_msgs actionlib std_msgs vigir_humanoid_control_msgs)
+find_package(catkin REQUIRED COMPONENTS rospy rqt_gui rqt_gui_py actionlib_msgs actionlib std_msgs thor_mang_control_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -80,7 +80,7 @@ catkin_python_setup()
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES
-  CATKIN_DEPENDS rospy rqt_gui rqt_gui_py actionlib_msgs actionlib std_msgs vigir_humanoid_control_msgs
+  CATKIN_DEPENDS rospy rqt_gui rqt_gui_py actionlib_msgs actionlib std_msgs thor_mang_control_msgs
 #  DEPENDS system_widgets
 )
 
