@@ -21,7 +21,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="appendage_layout"/>
+    <layout class="QGridLayout" name="appendage_grid"/>
    </item>
    <item>
     <layout class="QVBoxLayout" name="button_layout">

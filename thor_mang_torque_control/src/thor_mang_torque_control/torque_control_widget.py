@@ -1,4 +1,5 @@
 import os
+import math
 import QtCore
 
 import rospy
@@ -7,7 +8,7 @@ import rospkg
 from rqt_gui_py.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt, QObject
-from python_qt_binding.QtGui import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QComboBox, QColor, QFont, QListWidgetItem
+from python_qt_binding.QtGui import QWidget, QHBoxLayout, QVBoxLayout, QListWidgetItem
 
 from robotis_controller_msgs.msg import SyncWriteItem, RebootDevice
 
@@ -20,7 +21,7 @@ class TorqueControlDialog(Plugin):
 
         self._parent = QWidget()
         self._widget = TorqueControlWidget(self._parent)
-        
+
         context.add_widget(self._parent)
 
     def shutdown_plugin(self):
@@ -48,9 +49,9 @@ class TorqueControlWidget(QObject):
         self.appendage_ui_file = os.path.join(rp.get_path('thor_mang_torque_control'), 'resources', 'appendage_widget.ui')
 
         # load joints from parameter server
-        self.joint_groups = [JointGroup("-----------", "Misc")]
+        self.joint_groups = [JointGroup(["NONE"], "Misc")]
         self.load_groups()
-        self.load_joints("joint_list")
+        self.load_joints()
         self.add_appendage_widgets()
 
         # connect to signals
@@ -59,7 +60,6 @@ class TorqueControlWidget(QObject):
         self.torque_control_widget.select_all_button.clicked[bool].connect(self._handle_select_all_button_clicked)
         self.torque_control_widget.deselect_button.clicked[bool].connect(self._handle_deselect_button_clicked)
 
-
         # Qt signals
         # self.connect(self, QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._set_transition_mode_status_style)
 
@@ -67,39 +67,51 @@ class TorqueControlWidget(QObject):
         widget.setLayout(vbox)
 
         # init publishers
-        self.torque_pub = rospy.Publisher("robotis/sync_write_item", SyncWriteItem, queue_size=1000)
-        self.reboot_pub = rospy.Publisher("robotis/reboot_device", RebootDevice, queue_size=1000)
+        self.torque_pub = rospy.Publisher("robotis/sync_write_item", SyncWriteItem, queue_size=1)
+        self.reboot_pub = rospy.Publisher("robotis/reboot_device", RebootDevice, queue_size=1)
 
     def load_groups(self):
-        groups = rospy.get_param("groups", [])
+        groups = rospy.get_param("joints/groups", []).keys()
         for group in groups:
-            prefix = rospy.get_param(group + "/prefix", "not_found")
-            name = rospy.get_param(group + "/name", "No name found.")
+            prefix = rospy.get_param("joints/groups/" + group + "/prefix", "not_found")
+            name = rospy.get_param("joints/groups/" + group + "/name", "No name found.")
             self.joint_groups.append(JointGroup(prefix, name))
 
-    def load_joints(self, ns):
-        joint_list = rospy.get_param(ns, [])
+    def load_joints(self):
+        joint_list = rospy.get_param("joints/joint_list", [])
         for joint in joint_list:
             matched = False
             for group in self.joint_groups:
-                if joint.startswith(group.prefix):
-                    group.joint_list.append(joint)
-                    matched = True
+                for prefix in group.prefix:
+                    if joint.startswith(prefix):
+                        group.joint_list.append(joint)
+                        matched = True
+                        break
+                if matched:
                     break
             if not matched:
                 self.joint_groups[0].joint_list.append(joint)
 
     def add_appendage_widgets(self):
+        num_of_widgets = 0
+
         for group in self.joint_groups:
+            if len(group.joint_list) == 0:
+                continue
+
+            # create widget
             widget = QWidget()
             self.appendage_widgets.append(widget)
             loadUi(self.appendage_ui_file, widget, {'QWidget': QWidget})
             widget.appendage_group.setTitle(group.name)
-            # connect to signal
-            self.connect_select_button_signals(widget)
-            self.torque_control_widget.appendage_layout.addWidget(widget)
+            self.torque_control_widget.appendage_grid.addWidget(widget, math.floor(num_of_widgets / 4), num_of_widgets % 4)
             for joint in group.joint_list:
                 self.add_joint_to_list(joint, widget)
+
+            num_of_widgets += 1;
+
+            # connect to signal
+            self.connect_select_button_signals(widget)
 
     def connect_select_button_signals(self, widget):
         widget.select_all_button.clicked[bool].connect(lambda: self._handle_select_all_clicked(widget))
@@ -142,6 +154,7 @@ class TorqueControlWidget(QObject):
     def _handle_deselect_clicked(self, widget):
         for item in self.iter_items(widget.list):
             item.setCheckState(Qt.Unchecked)
+
     @staticmethod
     def add_joint_to_list(joint_name, widget):
         item = QListWidgetItem(joint_name)
