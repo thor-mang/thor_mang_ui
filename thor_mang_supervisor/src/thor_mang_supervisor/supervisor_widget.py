@@ -18,8 +18,6 @@ from python_qt_binding.QtGui import QWidget, QVBoxLayout, QColor, QFont
 from robotis_controller_msgs.msg import SyncWriteItem
 from thor_mang_control_msgs.msg import ControlModeStatus, GetControlModesAction, GetControlModesGoal, ChangeControlModeAction, ChangeControlModeGoal
 
-ft_sensor_names = ['r_hand', 'l_hand', 'r_foot', 'l_foot']
-
 
 class SupervisorDialog(Plugin):
 
@@ -63,9 +61,6 @@ class SupervisorWidget(QObject):
         loadUi(ui_file, self.supervisor_widget, {'QWidget': QWidget})
         vbox.addWidget(self.supervisor_widget)
 
-        for sensor in ft_sensor_names:
-            getattr(self.supervisor_widget, 'reset_' + sensor + '_button').clicked.connect(lambda x, _sensor=sensor: self._handle_reset_ft_clicked(x, _sensor))
-
         # style settings
         self._allowed_transition_color = QColor(0, 0, 0, 255)
         self._forbidden_transition_color = QColor(0, 0, 0, 100)
@@ -83,6 +78,11 @@ class SupervisorWidget(QObject):
         self.supervisor_widget.send_control_mode.clicked[bool].connect(self._handle_send_control_mode_clicked)
         self.supervisor_widget.allow_all_mode_transitions_button.clicked[bool].connect(self._handle_allow_all_mode_transitions_clicked)
 
+        self.supervisor_widget.ft_feet_air_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_air"))
+        self.supervisor_widget.ft_feet_ground_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_gnd"))
+        self.supervisor_widget.ft_feet_apply_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_apply"))
+        self.supervisor_widget.ft_feet_save_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_save"))
+
         # Qt signals
         self.connect(self, QtCore.SIGNAL('setAvailableControlStateList(PyQt_PyObject)'), self._set_available_control_state_list)
         self.connect(self, QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._set_transition_mode_status_style)
@@ -99,6 +99,8 @@ class SupervisorWidget(QObject):
         # init publisher
         self.sync_write_pub = rospy.Publisher("robotis/sync_write_item", SyncWriteItem, queue_size=10)
         self.allow_all_mode_transitions_pub = rospy.Publisher('control_mode_switcher/allow_all_mode_transitions', std_msgs.msg.Bool, queue_size=1)
+        self.ft_feet_calib_pub = rospy.Publisher("robotis/feet_ft/ft_calib_command", std_msgs.msg.String, queue_size=10)
+        self.ft_wrists_calib_pub = rospy.Publisher("robotis/wrists_ft/ft_calib_command", std_msgs.msg.String, queue_size=10)
 
         # action clients
         self.get_control_modes_client = actionlib.SimpleActionClient("control_mode_switcher/get_control_modes", GetControlModesAction)
@@ -274,11 +276,15 @@ class SupervisorWidget(QObject):
         self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._status_wait_style)
         self.allow_all_mode_transitions_pub.publish(std_msgs.msg.Bool(self._allow_all_mode_transitions_enabled))
 
-    def _handle_reset_ft_clicked(self, status, sensor):
-        pass
-
-    def reset_ft(self, sensor):
-        pass
+    def _handle_ft_command_clicked(self, sensor, command):
+        string_msg = std_msgs.msg.String()
+        string_msg.data = command
+        if sensor == "feet":
+            self.ft_feet_calib_pub.publish(command)
+        elif sensor == "wrists":
+            self.ft_wrists_calib_pub.publish(command)
+        else:
+            print "Unknown ft sensor ", sensor
 
 
 class JointGroup():

@@ -343,6 +343,9 @@
       </item>
       <item>
        <widget class="QRadioButton" name="lights_off">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>OFF</string>
         </property>
@@ -356,6 +359,9 @@
       </item>
       <item>
        <widget class="QRadioButton" name="lights_on">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>ON</string>
         </property>
@@ -376,6 +382,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="send_lights_mode">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Send</string>
         </property>
@@ -393,7 +402,7 @@
    </item>
    <item>
     <widget class="QWidget" name="reset_ft" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QLabel" name="ft_sensor_reset_label">
         <property name="text">
@@ -402,32 +411,91 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="reset_l_hand_button">
-        <property name="text">
-         <string>Left hand</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Feet</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ft_feet_air_button">
+          <property name="text">
+           <string>Air</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ft_feet_ground_button">
+          <property name="text">
+           <string>Ground</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ft_feet_apply_button">
+          <property name="text">
+           <string>Apply </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ft_feet_save_button">
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QPushButton" name="reset_r_hand_button">
-        <property name="text">
-         <string>Right hand</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="reset_l_foot_button">
-        <property name="text">
-         <string>Left foot</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="reset_r_foot_button">
-        <property name="text">
-         <string>Right foot</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Wrists</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ft_wrists_left_button">
+          <property name="text">
+           <string>Left</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ft_wrists_right_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Right</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ft_wrists_apply_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Apply</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ft_wrists_save_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
