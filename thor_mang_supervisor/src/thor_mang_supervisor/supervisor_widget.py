@@ -132,12 +132,14 @@ class SupervisorWidget(QObject):
                 for prefix in group.prefix:
                     if joint.startswith(prefix):
                         group.joint_list.append(joint)
+                        # print "Added joint", joint, "to group", group.name
                         matched = True
                         break
                 if matched:
                     break
             if not matched:
                 self.joint_groups["Misc"].joint_list.append(joint)
+                # print "Added joint", joint, "to group", self.joint_groups["Misc"].name
 
     def obtain_control_modes(self):
         if self.get_control_modes_client.wait_for_server(rospy.Duration(0.5)):
@@ -220,7 +222,7 @@ class SupervisorWidget(QObject):
             torque_arms = 1 if self.supervisor_widget.torque_arms.isChecked() else 0
             torque_legs = 1 if self.supervisor_widget.torque_legs.isChecked() else 0
             torque_head = 1 if self.supervisor_widget.torque_head.isChecked() else 0
-            torque_misc = 1 if self.supervisor_widget.torque_misc.isChecked() else 0
+            torque_torso = 1 if self.supervisor_widget.torque_torso.isChecked() else 0
 
             if "Fingers" in self.joint_groups:
                 msg.joint_name.extend(self.joint_groups["Fingers"].joint_list)
@@ -240,9 +242,9 @@ class SupervisorWidget(QObject):
             if "Head" in self.joint_groups:
                 msg.joint_name.extend(self.joint_groups["Head"].joint_list)
                 msg.value.extend([torque_head] * len(self.joint_groups["Head"].joint_list))
-            if "Misc" in self.joint_groups:
-                msg.joint_name.extend(self.joint_groups["Misc"].joint_list)
-                msg.value.extend([torque_misc] * len(self.joint_groups["Misc"].joint_list))
+            if "Torso" in self.joint_groups:
+                msg.joint_name.extend(self.joint_groups["Torso"].joint_list)
+                msg.value.extend([torque_torso] * len(self.joint_groups["Torso"].joint_list))
 
         self.sync_write_pub.publish(msg)
 

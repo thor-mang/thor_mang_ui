@@ -171,12 +171,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="torque_misc">
+      <widget class="QCheckBox" name="torque_torso">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>MISC</string>
+        <string>TORSO</string>
        </property>
       </widget>
      </item>
@@ -603,7 +603,7 @@
   <connection>
    <sender>torque_partial</sender>
    <signal>toggled(bool)</signal>
-   <receiver>torque_misc</receiver>
+   <receiver>torque_torso</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
