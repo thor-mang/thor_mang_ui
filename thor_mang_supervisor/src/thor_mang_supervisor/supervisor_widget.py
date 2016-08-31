@@ -80,8 +80,12 @@ class SupervisorWidget(QObject):
 
         self.supervisor_widget.ft_feet_air_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_air"))
         self.supervisor_widget.ft_feet_ground_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_gnd"))
-        self.supervisor_widget.ft_feet_apply_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_apply"))
+        self.supervisor_widget.ft_feet_apply_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_send"))
         self.supervisor_widget.ft_feet_save_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_save"))
+
+        self.supervisor_widget.ft_wrists_air_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_air"))
+        self.supervisor_widget.ft_wrists_apply_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_send"))
+        self.supervisor_widget.ft_wrists_save_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_save"))
 
         # Qt signals
         self.connect(self, QtCore.SIGNAL('setAvailableControlStateList(PyQt_PyObject)'), self._set_available_control_state_list)
