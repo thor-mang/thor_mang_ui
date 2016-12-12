@@ -18,6 +18,8 @@ from python_qt_binding.QtGui import QWidget, QVBoxLayout, QColor, QFont
 from robotis_controller_msgs.msg import SyncWriteItem
 from thor_mang_control_msgs.msg import ControlModeStatus, GetControlModesAction, GetControlModesGoal, ChangeControlModeAction, ChangeControlModeGoal
 
+LIDAR_NAME = "head_lidar_spinning_joint"
+
 
 class SupervisorDialog(Plugin):
 
@@ -86,6 +88,9 @@ class SupervisorWidget(QObject):
         self.supervisor_widget.ft_wrists_air_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_air"))
         self.supervisor_widget.ft_wrists_apply_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_send"))
         self.supervisor_widget.ft_wrists_save_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_save"))
+
+        self.supervisor_widget.lidar_send_button.clicked[bool].connect(self._handle_lidar_send_button_clicked)
+        self.supervisor_widget.lidar_speed_spin.valueChanged[int].connect(self._handle_lidar_speed_spin_changed)
 
         # Qt signals
         self.connect(self, QtCore.SIGNAL('setAvailableControlStateList(PyQt_PyObject)'), self._set_available_control_state_list)
@@ -292,9 +297,39 @@ class SupervisorWidget(QObject):
         else:
             print "Unknown ft sensor ", sensor
 
+    def _handle_lidar_send_button_clicked(self):
+        msg = SyncWriteItem()
+        msg.joint_name.append(LIDAR_NAME)
+        if self.supervisor_widget.torque_lidar.isChecked():
+            # send speed
+            msg.item_name = "goal_velocity"
+            speed = self.supervisor_widget.lidar_speed_spin.value()
+            msg.value.append(speed)
+        else:
+            # send torque off
+            msg.item_name = "torque_enable"
+            msg.value = 0
+        self.sync_write_pub.publish(msg)
+
+    def _handle_lidar_speed_spin_changed(self):
+        speed = self.supervisor_widget.lidar_speed_spin.value()
+        rpm = speed * 0.114
+        radpsec = rpm * 0.104719755
+
+        self.supervisor_widget.lidar_rps_label.setText(truncate(radpsec, 2) + " rad/sec")
+
 
 class JointGroup():
     def __init__(self, prefix, name):
         self.prefix = prefix
         self.name = name
         self.joint_list = []
+
+
+def truncate(f, n):
+    '''Truncates/pads a float f to n decimal places without rounding'''
+    s = '{}'.format(f)
+    if 'e' in s or 'E' in s:
+        return '{0:.{1}f}'.format(f, n)
+    i, p, d = s.partition('.')
+    return '.'.join([i, (d+'0'*n)[:n]])
