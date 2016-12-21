@@ -308,7 +308,7 @@ class SupervisorWidget(QObject):
         else:
             # send torque off
             msg.item_name = "torque_enable"
-            msg.value = 0
+            msg.value.append(0)
         self.sync_write_pub.publish(msg)
 
     def _handle_lidar_speed_spin_changed(self):
