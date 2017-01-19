@@ -127,8 +127,11 @@ class SupervisorWidget(QObject):
         print "Done!"
 
     def load_groups(self):
-        groups = rospy.get_param("joints/groups", []).keys()
-        for group in groups:
+        groups = rospy.get_param("joints/groups", [])
+        if not groups:
+            return
+
+        for group in groups.keys():
             prefix = rospy.get_param("joints/groups/" + group + "/prefix", "not_found")
             name = rospy.get_param("joints/groups/" + group + "/name", "No name found.")
             self.joint_groups[name] = (JointGroup(prefix, name))
@@ -151,7 +154,7 @@ class SupervisorWidget(QObject):
                 # print "Added joint", joint, "to group", self.joint_groups["Misc"].name
 
     def obtain_control_modes(self):
-        if self.get_control_modes_client.wait_for_server(rospy.Duration(0.5)):
+        if self.get_control_modes_client.wait_for_server(rospy.Duration(1.0)):
             self.get_control_modes_client.send_goal(GetControlModesGoal())
 
             # waiting for getting list of parameter set names
@@ -168,8 +171,11 @@ class SupervisorWidget(QObject):
                 self.emit(QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), status)
                 self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_ok_style)
             else:
-                rospy.logwarn("Didn't receive control modes %.1f sec. Check communcation!" % action_timeout.to_sec())
+                rospy.logwarn("Didn't receive control modes %.1f sec. Check communication!" % action_timeout.to_sec())
                 self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_error_style)
+        else:
+            rospy.logwarn("Couldn't connect to control mode switcher server. Check communication!")
+            self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_error_style)
 
     def _control_mode_status_callback(self, status):
         self.emit(QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), status)
@@ -205,7 +211,7 @@ class SupervisorWidget(QObject):
                 if target_mode == new_mode:
                     self.supervisor_widget.control_state_list.item(i).setTextColor(self._allowed_transition_color)
                     self.supervisor_widget.control_state_list.item(i).setFont(self._active_mode_font)
-                elif not self._allow_all_mode_transitions_enabled and  target_mode not in status.allowed_control_modes:
+                elif not self._allow_all_mode_transitions_enabled and target_mode not in status.allowed_control_modes:
                     self.supervisor_widget.control_state_list.item(i).setTextColor(self._forbidden_transition_color)
                     self.supervisor_widget.control_state_list.item(i).setFont(self._inactive_mode_font)
                 else:
