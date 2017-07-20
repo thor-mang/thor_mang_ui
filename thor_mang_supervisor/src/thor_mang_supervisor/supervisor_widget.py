@@ -8,12 +8,11 @@ import actionlib
 
 import std_msgs.msg
 
-import QtCore
-
 from rqt_gui_py.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtCore import Qt, QObject
-from python_qt_binding.QtGui import QWidget, QVBoxLayout, QColor, QFont
+from python_qt_binding.QtCore import Qt, QObject, pyqtSignal
+from python_qt_binding.QtGui import QColor, QFont
+from python_qt_binding.QtWidgets import QWidget, QVBoxLayout
 
 from robotis_controller_msgs.msg import SyncWriteItem
 from thor_mang_control_msgs.msg import ControlModeStatus, GetControlModesAction, GetControlModesGoal, ChangeControlModeAction, ChangeControlModeGoal
@@ -37,6 +36,11 @@ class SupervisorDialog(Plugin):
 
 
 class SupervisorWidget(QObject):
+
+    setAvailableControlStateList = pyqtSignal(list)
+    setTransitionModeStatusStyle = pyqtSignal(str)
+    setRobotModeStatusStyle = pyqtSignal(str)
+    setRobotModeStatusText = pyqtSignal(ControlModeStatus)
 
     def __init__(self, context):
         super(SupervisorWidget, self).__init__()
@@ -93,10 +97,10 @@ class SupervisorWidget(QObject):
         self.supervisor_widget.lidar_speed_spin.valueChanged[int].connect(self._handle_lidar_speed_spin_changed)
 
         # Qt signals
-        self.connect(self, QtCore.SIGNAL('setAvailableControlStateList(PyQt_PyObject)'), self._set_available_control_state_list)
-        self.connect(self, QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._set_transition_mode_status_style)
-        self.connect(self, QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._set_robot_mode_status_style)
-        self.connect(self, QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), self._set_robot_mode_status_text)
+        self.setAvailableControlStateList.connect(self._set_available_control_state_list)
+        self.setTransitionModeStatusStyle.connect(self._set_transition_mode_status_style)
+        self.setRobotModeStatusStyle.connect(self._set_robot_mode_status_style)
+        self.setRobotModeStatusText.connect(self._set_robot_mode_status_text)
 
         # end widget
         widget.setLayout(vbox)
@@ -163,32 +167,32 @@ class SupervisorWidget(QObject):
                 result = self.get_control_modes_client.get_result()
 
                 available_control_modes = result.available_control_modes
-                self.emit(QtCore.SIGNAL('setAvailableControlStateList(PyQt_PyObject)'), available_control_modes)
+                self.setAvailableControlStateList.emit(available_control_modes)
 
                 status = ControlModeStatus()
                 status.current_control_mode = result.current_control_mode
                 status.allowed_control_modes = result.allowed_control_modes
-                self.emit(QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), status)
-                self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_ok_style)
+                self.setRobotModeStatusText.emit(status)
+                self.setRobotModeStatusStyle.emit(self._status_ok_style)
             else:
                 rospy.logwarn("Didn't receive control modes %.1f sec. Check communication!" % action_timeout.to_sec())
-                self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_error_style)
+                self.setRobotModeStatusStyle.emit(self._status_error_style)
         else:
             rospy.logwarn("Couldn't connect to control mode switcher server. Check communication!")
-            self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_error_style)
+            self.setRobotModeStatusStyle.emit(self._status_error_style)
 
     def _control_mode_status_callback(self, status):
-        self.emit(QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), status)
+        self.setRobotModeStatusText.emit(status)
         if status.status & ControlModeStatus.NO_ERROR or status.status & ControlModeStatus.MODE_ACCEPTED:
-            self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_ok_style)
+            self.setRobotModeStatusStyle.emit(self._status_ok_style)
         else:
-            self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_error_style)
+            self.setRobotModeStatusStyle.emit(self._status_error_style)
         self._last_control_mode_status = status
 
     def _allow_all_mode_transitions_status_callback(self, allowed_msg):
         self._allow_all_mode_transitions_enabled = allowed_msg.data
-        self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._status_ok_style)
-        self.emit(QtCore.SIGNAL('setRobotModeStatusText(PyQt_PyObject)'), self._last_control_mode_status)
+        self.setTransitionModeStatusStyle.emit(self._status_ok_style)
+        self.setRobotModeStatusText.emit(self._last_control_mode_status)
 
     def _set_available_control_state_list(self, available_modes):
         self.supervisor_widget.control_state_list.clear()
@@ -209,13 +213,13 @@ class SupervisorWidget(QObject):
             for i in range(self.supervisor_widget.control_state_list.count()):
                 target_mode = self.supervisor_widget.control_state_list.item(i).text().lower()
                 if target_mode == new_mode:
-                    self.supervisor_widget.control_state_list.item(i).setTextColor(self._allowed_transition_color)
+                    self.supervisor_widget.control_state_list.item(i).setForeground(self._allowed_transition_color)
                     self.supervisor_widget.control_state_list.item(i).setFont(self._active_mode_font)
                 elif not self._allow_all_mode_transitions_enabled and target_mode not in status.allowed_control_modes:
-                    self.supervisor_widget.control_state_list.item(i).setTextColor(self._forbidden_transition_color)
+                    self.supervisor_widget.control_state_list.item(i).setForeground(self._forbidden_transition_color)
                     self.supervisor_widget.control_state_list.item(i).setFont(self._inactive_mode_font)
                 else:
-                    self.supervisor_widget.control_state_list.item(i).setTextColor(self._allowed_transition_color)
+                    self.supervisor_widget.control_state_list.item(i).setForeground(self._allowed_transition_color)
                     self.supervisor_widget.control_state_list.item(i).setFont(self._inactive_mode_font)
 
     def _handle_send_torque_mode_clicked(self):
@@ -269,7 +273,7 @@ class SupervisorWidget(QObject):
 
     def _handle_send_control_mode_clicked(self):
         if self.set_control_mode_client.wait_for_server(rospy.Duration(0.5)):
-            self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_wait_style)
+            self.setRobotModeStatusStyle.emit(self._status_wait_style)
             goal = ChangeControlModeGoal()
             goal.mode_request = self.supervisor_widget.control_state_list.currentItem().text().lower()
             rospy.loginfo("Requesting mode change to " + goal.mode_request + ".")
@@ -282,7 +286,7 @@ class SupervisorWidget(QObject):
                 self._control_mode_status_callback(result.result)
             else:
                 rospy.logwarn("Didn't receive any results after %.1f sec. Check communcation!" % action_timeout.to_sec())
-                self.emit(QtCore.SIGNAL('setRobotModeStatusStyle(PyQt_PyObject)'), self._status_error_style)
+                self.setRobotModeStatusStyle.emit(self._status_error_style)
         else:
             rospy.logerr("Can't connect to control mode action server!")
 
@@ -290,7 +294,7 @@ class SupervisorWidget(QObject):
         self._allow_all_mode_transitions_enabled = not self._allow_all_mode_transitions_enabled
         self.supervisor_widget.allow_all_mode_transitions_status.setText("all allowed" if self._allow_all_mode_transitions_enabled else "restricted")
         self.supervisor_widget.allow_all_mode_transitions_button.setText("Restrict" if self._allow_all_mode_transitions_enabled else "Allow All")
-        self.emit(QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._status_wait_style)
+        self.setTransitionModeStatusStyle.emit(self._status_wait_style)
         self.allow_all_mode_transitions_pub.publish(std_msgs.msg.Bool(self._allow_all_mode_transitions_enabled))
 
     def _handle_ft_command_clicked(self, sensor, command):

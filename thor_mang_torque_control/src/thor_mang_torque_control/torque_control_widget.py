@@ -8,7 +8,7 @@ import rospkg
 from rqt_gui_py.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt, QObject
-from python_qt_binding.QtGui import QWidget, QHBoxLayout, QVBoxLayout, QListWidgetItem
+from python_qt_binding.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidgetItem
 
 from robotis_controller_msgs.msg import SyncWriteItem, RebootDevice
 
