@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="robot_name" default="johnny5" />
+
+  <group ns="$(arg robot_name)">
+    <include file="$(find thormang3_demo)/launch/thormang3_demo.launch" />
+  </group>
+</launch>

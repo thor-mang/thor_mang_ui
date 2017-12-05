@@ -1,0 +1,157 @@
+{
+  "keys": {},
+  "groups": {
+    "pluginmanager": {
+      "keys": {
+        "running-plugins": {
+          "type": "repr",
+          "repr": "{u'vigir_footstep_planning_widgets/StepInterfaceWidgetPlugin': [1], u'__DockWidgetContainer': [1], u'rqt_joint_trajectory_controller/JointTrajectoryController': [1], u'thor_mang_supervisor/SupervisorWidgetPlugin': [1]}"
+        }
+      },
+      "groups": {
+        "plugin____DockWidgetContainer__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget": {
+              "keys": {
+                "dockable": {
+                  "type": "repr",
+                  "repr": "True"
+                },
+                "parent": {
+                  "type": "repr",
+                  "repr": "None"
+                },
+                "dock_widget_title": {
+                  "type": "repr",
+                  "repr": "u'Container'"
+                }
+              },
+              "groups": {
+                "mainwindow": {
+                  "keys": {
+                    "geometry": {
+                      "type": "repr(QByteArray.hex)",
+                      "repr(QByteArray.hex)": "QtCore.QByteArray('01d9d0cb0002000000000000000000150000029b000003b10000000000000000ffffffffffffffff00000000000000000780')",
+                      "pretty-print": "                         "
+                    },
+                    "state": {
+                      "type": "repr(QByteArray.hex)",
+                      "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff00000000fd00000001000000020000029c0000039dfc0100000001fc000000000000029c0000029c00fffffffa000000000200000003fb0000006200740068006f0072005f006d0061006e0067005f00730075007000650072007600690073006f0072005f005f00530075007000650072007600690073006f00720057006900640067006500740050006c007500670069006e005f005f0031005f005f0100000000ffffffff000002b400fffffffb000000b4007200710074005f006a006f0069006e0074005f007400720061006a006500630074006f00720079005f0063006f006e00740072006f006c006c00650072005f005f004a006f0069006e0074005400720061006a006500630074006f007200790043006f006e00740072006f006c006c00650072005f005f0031005f005f004a006f0069006e0074005400720061006a006500630074006f007200790043006f006e00740072006f006c006c00650072005500690100000000ffffffff0000018900fffffffb0000007e00760069006700690072005f0066006f006f00740073007400650070005f0070006c0061006e006e0069006e0067005f0077006900640067006500740073005f005f00530074006500700049006e00740065007200660061006300650057006900640067006500740050006c007500670069006e005f005f0031005f005f0100000000000003a70000037f00ffffff0000029c0000000000000004000000040000000800000008fc00000000')",
+                      "pretty-print": "                                                                                                                                                                                                                                                                                      "
+                    }
+                  },
+                  "groups": {}
+                }
+              }
+            }
+          }
+        },
+        "plugin__thor_mang_supervisor__SupervisorWidgetPlugin__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget__": {
+              "keys": {
+                "dockable": {
+                  "type": "repr",
+                  "repr": "True"
+                },
+                "parent": {
+                  "type": "repr",
+                  "repr": "1"
+                },
+                "dock_widget_title": {
+                  "type": "repr",
+                  "repr": "u''"
+                }
+              },
+              "groups": {}
+            }
+          }
+        },
+        "plugin__vigir_footstep_planning_widgets__StepInterfaceWidgetPlugin__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget__": {
+              "keys": {
+                "dockable": {
+                  "type": "repr",
+                  "repr": "True"
+                },
+                "parent": {
+                  "type": "repr",
+                  "repr": "1"
+                },
+                "dock_widget_title": {
+                  "type": "repr",
+                  "repr": "u''"
+                }
+              },
+              "groups": {}
+            }
+          }
+        },
+        "plugin__rqt_joint_trajectory_controller__JointTrajectoryController__1": {
+          "keys": {},
+          "groups": {
+            "plugin": {
+              "keys": {
+                "jtc_name": {
+                  "type": "repr",
+                  "repr": "[]"
+                },
+                "cm_ns": {
+                  "type": "repr",
+                  "repr": "[]"
+                }
+              },
+              "groups": {}
+            },
+            "dock_widget__JointTrajectoryControllerUi": {
+              "keys": {
+                "dockable": {
+                  "type": "repr",
+                  "repr": "True"
+                },
+                "parent": {
+                  "type": "repr",
+                  "repr": "1"
+                },
+                "dock_widget_title": {
+                  "type": "repr",
+                  "repr": "u'Joint trajectory controller'"
+                }
+              },
+              "groups": {}
+            }
+          }
+        }
+      }
+    },
+    "mainwindow": {
+      "keys": {
+        "geometry": {
+          "type": "repr(QByteArray.hex)",
+          "repr(QByteArray.hex)": "QtCore.QByteArray('01d9d0cb00020000000009ed0000002000000c8800000403000009ed0000003c00000c880000040300000000000000000780')",
+          "pretty-print": "               <         "
+        },
+        "state": {
+          "type": "repr(QByteArray.hex)",
+          "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff00000000fd00000001000000030000029c000003b2fc0100000003fb0000006200740068006f0072005f006d0061006e0067005f00730075007000650072007600690073006f0072005f005f00530075007000650072007600690073006f00720057006900640067006500740050006c007500670069006e005f005f0031005f005f030000088a000000b2000002f1000003bcfc000000000000029c0000029c00fffffffc0200000002fb0000007e00760069006700690072005f0066006f006f00740073007400650070005f0070006c0061006e006e0069006e0067005f0077006900640067006500740073005f005f00530074006500700049006e00740065007200660061006300650057006900640067006500740050006c007500670069006e005f005f0031005f005f0300000cbc000000b80000029e000003a7fb00000030005f005f0044006f0063006b0057006900640067006500740043006f006e007400610069006e00650072005f005f00310100000000000003b2000003b200fffffffb000000b4007200710074005f006a006f0069006e0074005f007400720061006a006500630074006f00720079005f0063006f006e00740072006f006c006c00650072005f005f004a006f0069006e0074005400720061006a006500630074006f007200790043006f006e00740072006f006c006c00650072005f005f0031005f005f004a006f0069006e0074005400720061006a006500630074006f007200790043006f006e00740072006f006c006c00650072005500690300000879000004160000012a000003da0000029c0000000000000004000000040000000800000008fc00000001000000030000000100000036004d0069006e0069006d0069007a006500640044006f0063006b00570069006400670065007400730054006f006f006c0062006100720000000000ffffffff0000000000000000')",
+          "pretty-print": "                 bthor_mang_supervisor__SupervisorWidgetPlugin__1__                                                                                                                                                                                                                               y   *                                                          "
+        }
+      },
+      "groups": {
+        "toolbar_areas": {
+          "keys": {
+            "MinimizedDockWidgetsToolbar": {
+              "type": "repr",
+              "repr": "8"
+            }
+          },
+          "groups": {}
+        }
+      }
+    }
+  }
+}

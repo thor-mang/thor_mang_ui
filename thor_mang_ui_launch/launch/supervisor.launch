@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+  <group ns="johnny5">
+    <include file="$(find thor_mang_supervisor)/launch/supervisor_rqt.launch" />
+  </group>
+</launch> 
