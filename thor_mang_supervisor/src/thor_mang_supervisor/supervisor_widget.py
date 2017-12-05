@@ -27,9 +27,7 @@ class SupervisorDialog(Plugin):
         self.setObjectName('SupervisorDialog')
 
         self._parent = QWidget()
-        self._widget = SupervisorWidget(self._parent)
-
-        context.add_widget(self._parent)
+        self._widget = SupervisorWidget(context)
 
     def shutdown_plugin(self):
         self._widget.shutdown_plugin()
@@ -43,7 +41,8 @@ class SupervisorWidget(QObject):
     setRobotModeStatusText = pyqtSignal(ControlModeStatus)
 
     def __init__(self, context):
-        super(SupervisorWidget, self).__init__()
+        super(SupervisorWidget, self).__init__(context)
+        self.setObjectName('Supervisor')
 
         self._last_control_mode_status = ControlModeStatus()
 
@@ -57,15 +56,13 @@ class SupervisorWidget(QObject):
         self.load_joints()
 
         # start widget
-        widget = context
-        vbox = QVBoxLayout()
+        self._widget = QWidget()
 
         # load from ui
-        self.supervisor_widget = QWidget()
         rp = rospkg.RosPack()
         ui_file = os.path.join(rp.get_path('thor_mang_supervisor'), 'resource', 'supervisor.ui')
-        loadUi(ui_file, self.supervisor_widget, {'QWidget': QWidget})
-        vbox.addWidget(self.supervisor_widget)
+        loadUi(ui_file, self._widget, {'QWidget': QWidget})
+        self._widget.setObjectName('SupervisorUi')
 
         # style settings
         self._allowed_transition_color = QColor(0, 0, 0, 255)
@@ -79,22 +76,22 @@ class SupervisorWidget(QObject):
         self._status_error_style = "background-color: rgb(255, 220, 150);"
 
         # connect to signals
-        self.supervisor_widget.send_torque_mode.clicked[bool].connect(self._handle_send_torque_mode_clicked)
-        self.supervisor_widget.send_lights_mode.clicked[bool].connect(self._handle_send_lights_mode_clicked)
-        self.supervisor_widget.send_control_mode.clicked[bool].connect(self._handle_send_control_mode_clicked)
-        self.supervisor_widget.allow_all_mode_transitions_button.clicked[bool].connect(self._handle_allow_all_mode_transitions_clicked)
+        self._widget.send_torque_mode.clicked[bool].connect(self._handle_send_torque_mode_clicked)
+        self._widget.send_lights_mode.clicked[bool].connect(self._handle_send_lights_mode_clicked)
+        self._widget.send_control_mode.clicked[bool].connect(self._handle_send_control_mode_clicked)
+        self._widget.allow_all_mode_transitions_button.clicked[bool].connect(self._handle_allow_all_mode_transitions_clicked)
 
-        self.supervisor_widget.ft_feet_air_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_air"))
-        self.supervisor_widget.ft_feet_ground_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_gnd"))
-        self.supervisor_widget.ft_feet_apply_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_send"))
-        self.supervisor_widget.ft_feet_save_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_save"))
+        self._widget.ft_feet_air_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_air"))
+        self._widget.ft_feet_ground_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_gnd"))
+        self._widget.ft_feet_apply_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_send"))
+        self._widget.ft_feet_save_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("feet", "ft_save"))
 
-        self.supervisor_widget.ft_wrists_air_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_air"))
-        self.supervisor_widget.ft_wrists_apply_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_send"))
-        self.supervisor_widget.ft_wrists_save_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_save"))
+        self._widget.ft_wrists_air_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_air"))
+        self._widget.ft_wrists_apply_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_send"))
+        self._widget.ft_wrists_save_button.clicked[bool].connect(lambda: self._handle_ft_command_clicked("wrists", "ft_save"))
 
-        self.supervisor_widget.lidar_send_button.clicked[bool].connect(self._handle_lidar_send_button_clicked)
-        self.supervisor_widget.lidar_speed_spin.valueChanged[int].connect(self._handle_lidar_speed_spin_changed)
+        self._widget.lidar_send_button.clicked[bool].connect(self._handle_lidar_send_button_clicked)
+        self._widget.lidar_speed_spin.valueChanged[int].connect(self._handle_lidar_speed_spin_changed)
 
         # Qt signals
         self.setAvailableControlStateList.connect(self._set_available_control_state_list)
@@ -102,8 +99,12 @@ class SupervisorWidget(QObject):
         self.setRobotModeStatusStyle.connect(self._set_robot_mode_status_style)
         self.setRobotModeStatusText.connect(self._set_robot_mode_status_text)
 
-        # end widget
-        widget.setLayout(vbox)
+        # set window title
+        if context.serial_number() > 1:
+            self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+
+        # add widget to the user interface
+        context.add_widget(self._widget)
 
         # init subscribers
         self.control_mode_status_sub = rospy.Subscriber("control_mode_switcher/status", ControlModeStatus, self._control_mode_status_callback)
@@ -195,53 +196,53 @@ class SupervisorWidget(QObject):
         self.setRobotModeStatusText.emit(self._last_control_mode_status)
 
     def _set_available_control_state_list(self, available_modes):
-        self.supervisor_widget.control_state_list.clear()
+        self._widget.control_state_list.clear()
         for mode in available_modes:
-          self.supervisor_widget.control_state_list.addItem(mode)
+          self._widget.control_state_list.addItem(mode)
 
     def _set_transition_mode_status_style(self, style_sheet_string):
-        self.supervisor_widget.allow_all_mode_transitions_status.setStyleSheet(style_sheet_string)
+        self._widget.allow_all_mode_transitions_status.setStyleSheet(style_sheet_string)
 
     def _set_robot_mode_status_style(self, style_sheet_string):
-        self.supervisor_widget.robot_mode_status.setStyleSheet(style_sheet_string)
+        self._widget.robot_mode_status.setStyleSheet(style_sheet_string)
 
     def _set_robot_mode_status_text(self, status):
         new_mode = str(status.current_control_mode)
-        self.supervisor_widget.robot_mode_status.setText(new_mode.upper())
+        self._widget.robot_mode_status.setText(new_mode.upper())
         new_mode = new_mode.lower()
         if status.allowed_control_modes is not None:
-            for i in range(self.supervisor_widget.control_state_list.count()):
-                target_mode = self.supervisor_widget.control_state_list.item(i).text().lower()
+            for i in range(self._widget.control_state_list.count()):
+                target_mode = self._widget.control_state_list.item(i).text().lower()
                 if target_mode == new_mode:
-                    self.supervisor_widget.control_state_list.item(i).setForeground(self._allowed_transition_color)
-                    self.supervisor_widget.control_state_list.item(i).setFont(self._active_mode_font)
+                    self._widget.control_state_list.item(i).setForeground(self._allowed_transition_color)
+                    self._widget.control_state_list.item(i).setFont(self._active_mode_font)
                 elif not self._allow_all_mode_transitions_enabled and target_mode not in status.allowed_control_modes:
-                    self.supervisor_widget.control_state_list.item(i).setForeground(self._forbidden_transition_color)
-                    self.supervisor_widget.control_state_list.item(i).setFont(self._inactive_mode_font)
+                    self._widget.control_state_list.item(i).setForeground(self._forbidden_transition_color)
+                    self._widget.control_state_list.item(i).setFont(self._inactive_mode_font)
                 else:
-                    self.supervisor_widget.control_state_list.item(i).setForeground(self._allowed_transition_color)
-                    self.supervisor_widget.control_state_list.item(i).setFont(self._inactive_mode_font)
+                    self._widget.control_state_list.item(i).setForeground(self._allowed_transition_color)
+                    self._widget.control_state_list.item(i).setFont(self._inactive_mode_font)
 
     def _handle_send_torque_mode_clicked(self):
         msg = SyncWriteItem()
         msg.item_name = "torque_enable"
 
-        if self.supervisor_widget.torque_off.isChecked():
+        if self._widget.torque_off.isChecked():
             for joint_group in self.joint_groups.values():
                 msg.joint_name.extend(joint_group.joint_list)
                 msg.value.extend([0] * len(joint_group.joint_list))
 
-        elif self.supervisor_widget.torque_on.isChecked():
+        elif self._widget.torque_on.isChecked():
             for joint_group in self.joint_groups.values():
                 msg.joint_name.extend(joint_group.joint_list)
                 msg.value.extend([1] * len(joint_group.joint_list))
 
-        elif self.supervisor_widget.torque_partial.isChecked():
-            torque_hands = 1 if self.supervisor_widget.torque_hands.isChecked() else 0
-            torque_arms = 1 if self.supervisor_widget.torque_arms.isChecked() else 0
-            torque_legs = 1 if self.supervisor_widget.torque_legs.isChecked() else 0
-            torque_head = 1 if self.supervisor_widget.torque_head.isChecked() else 0
-            torque_torso = 1 if self.supervisor_widget.torque_torso.isChecked() else 0
+        elif self._widget.torque_partial.isChecked():
+            torque_hands = 1 if self._widget.torque_hands.isChecked() else 0
+            torque_arms = 1 if self._widget.torque_arms.isChecked() else 0
+            torque_legs = 1 if self._widget.torque_legs.isChecked() else 0
+            torque_head = 1 if self._widget.torque_head.isChecked() else 0
+            torque_torso = 1 if self._widget.torque_torso.isChecked() else 0
 
             if "Fingers" in self.joint_groups:
                 msg.joint_name.extend(self.joint_groups["Fingers"].joint_list)
@@ -268,14 +269,14 @@ class SupervisorWidget(QObject):
         self.sync_write_pub.publish(msg)
 
     def _handle_send_lights_mode_clicked(self):
-        #self.enable_lights_pub.publish(self.supervisor_widget.lights_on.isChecked())
+        #self.enable_lights_pub.publish(self._widget.lights_on.isChecked())
         pass
 
     def _handle_send_control_mode_clicked(self):
         if self.set_control_mode_client.wait_for_server(rospy.Duration(0.5)):
             self.setRobotModeStatusStyle.emit(self._status_wait_style)
             goal = ChangeControlModeGoal()
-            goal.mode_request = self.supervisor_widget.control_state_list.currentItem().text().lower()
+            goal.mode_request = self._widget.control_state_list.currentItem().text().lower()
             rospy.loginfo("Requesting mode change to " + goal.mode_request + ".")
             self.set_control_mode_client.send_goal(goal)
 
@@ -292,8 +293,8 @@ class SupervisorWidget(QObject):
 
     def _handle_allow_all_mode_transitions_clicked(self):
         self._allow_all_mode_transitions_enabled = not self._allow_all_mode_transitions_enabled
-        self.supervisor_widget.allow_all_mode_transitions_status.setText("all allowed" if self._allow_all_mode_transitions_enabled else "restricted")
-        self.supervisor_widget.allow_all_mode_transitions_button.setText("Restrict" if self._allow_all_mode_transitions_enabled else "Allow All")
+        self._widget.allow_all_mode_transitions_status.setText("all allowed" if self._allow_all_mode_transitions_enabled else "restricted")
+        self._widget.allow_all_mode_transitions_button.setText("Restrict" if self._allow_all_mode_transitions_enabled else "Allow All")
         self.setTransitionModeStatusStyle.emit(self._status_wait_style)
         self.allow_all_mode_transitions_pub.publish(std_msgs.msg.Bool(self._allow_all_mode_transitions_enabled))
 
@@ -310,10 +311,10 @@ class SupervisorWidget(QObject):
     def _handle_lidar_send_button_clicked(self):
         msg = SyncWriteItem()
         msg.joint_name.append(LIDAR_NAME)
-        if self.supervisor_widget.torque_lidar.isChecked():
+        if self._widget.torque_lidar.isChecked():
             # send speed
             msg.item_name = "goal_velocity"
-            speed = self.supervisor_widget.lidar_speed_spin.value()
+            speed = self._widget.lidar_speed_spin.value()
             msg.value.append(speed)
         else:
             # send torque off
@@ -322,11 +323,11 @@ class SupervisorWidget(QObject):
         self.sync_write_pub.publish(msg)
 
     def _handle_lidar_speed_spin_changed(self):
-        speed = self.supervisor_widget.lidar_speed_spin.value()
+        speed = self._widget.lidar_speed_spin.value()
         rpm = speed * 0.114
         radpsec = rpm * 0.104719755
 
-        self.supervisor_widget.lidar_rps_label.setText(truncate(radpsec, 2) + " rad/sec")
+        self._widget.lidar_rps_label.setText(truncate(radpsec, 2) + " rad/sec")
 
 
 class JointGroup():

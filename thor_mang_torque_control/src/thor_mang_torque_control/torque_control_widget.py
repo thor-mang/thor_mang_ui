@@ -20,9 +20,7 @@ class TorqueControlDialog(Plugin):
         self.setObjectName('TorqueControlDialog')
 
         self._parent = QWidget()
-        self._widget = TorqueControlWidget(self._parent)
-
-        context.add_widget(self._parent)
+        self._widget = TorqueControlWidget(context)
 
     def shutdown_plugin(self):
         self._widget.shutdown_plugin()
@@ -32,17 +30,16 @@ class TorqueControlWidget(QObject):
 
     def __init__(self, context):
         super(TorqueControlWidget, self).__init__()
+        self.setObjectName('TorqueControl')
 
         # start widget
-        widget = context
-        vbox = QVBoxLayout()
+        self._widget = QWidget()
 
         # load from ui
-        self.torque_control_widget = QWidget()
         rp = rospkg.RosPack()
         ui_file = os.path.join(rp.get_path('thor_mang_torque_control'), 'resources', 'torque_control.ui')
-        loadUi(ui_file, self.torque_control_widget, {'QWidget': QWidget})
-        vbox.addWidget(self.torque_control_widget)
+        loadUi(ui_file, self._widget, {'QWidget': QWidget})
+        self._widget.setObjectName('TorqueControlUi')
 
         # load appendage ui
         self.appendage_widgets = []
@@ -55,16 +52,20 @@ class TorqueControlWidget(QObject):
         self.add_appendage_widgets()
 
         # connect to signals
-        self.torque_control_widget.send_torque.clicked[bool].connect(self._handle_send_torque_clicked)
-        self.torque_control_widget.send_reboot.clicked[bool].connect(self._handle_send_reboot_clicked)
-        self.torque_control_widget.select_all_button.clicked[bool].connect(self._handle_select_all_button_clicked)
-        self.torque_control_widget.deselect_button.clicked[bool].connect(self._handle_deselect_button_clicked)
+        self._widget.send_torque.clicked[bool].connect(self._handle_send_torque_clicked)
+        self._widget.send_reboot.clicked[bool].connect(self._handle_send_reboot_clicked)
+        self._widget.select_all_button.clicked[bool].connect(self._handle_select_all_button_clicked)
+        self._widget.deselect_button.clicked[bool].connect(self._handle_deselect_button_clicked)
 
         # Qt signals
         # self.connect(self, QtCore.SIGNAL('setTransitionModeStatusStyle(PyQt_PyObject)'), self._set_transition_mode_status_style)
 
-        # end widget
-        widget.setLayout(vbox)
+        # set window title
+        if context.serial_number() > 1:
+            self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+
+        # add widget to the user interface
+        context.add_widget(self._widget)
 
         # init publishers
         self.torque_pub = rospy.Publisher("robotis/sync_write_item", SyncWriteItem, queue_size=1)
@@ -104,7 +105,7 @@ class TorqueControlWidget(QObject):
             self.appendage_widgets.append(widget)
             loadUi(self.appendage_ui_file, widget, {'QWidget': QWidget})
             widget.appendage_group.setTitle(group.name)
-            self.torque_control_widget.appendage_grid.addWidget(widget, math.floor(num_of_widgets / 4), num_of_widgets % 4)
+            self._widget.appendage_grid.addWidget(widget, math.floor(num_of_widgets / 4), num_of_widgets % 4)
             for joint in group.joint_list:
                 self.add_joint_to_list(joint, widget)
 
