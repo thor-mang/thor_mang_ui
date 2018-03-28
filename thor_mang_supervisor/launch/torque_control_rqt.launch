@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+  <node name="torque_control_rqt_widget" pkg="thor_mang_supervisor" type="torque_control_rqt" output="screen" respawn="true"/>
+
+  <!--Load joints-->
+  <rosparam command="load" file="$(find thor_mang_torque_control)/config/thormang3_joint_groups.yaml"/>
+  <rosparam command="load" file="$(find thor_mang_torque_control)/config/thormang3_joint_list.yaml"/>
+</launch>

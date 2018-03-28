@@ -1,5 +1,65 @@
 <library path="src">
-  <class name="SupervisorWidgetPlugin" type="thor_mang_supervisor.supervisor_widget.SupervisorDialog" base_class_type="rqt_gui_py::Plugin">
+<class name="FeetWristControlPlugin" type="thor_mang_supervisor.feet_wrist_control_widget.FeetWristControlDialog" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      FeetWrist GUI plugin for Thor-Mang robot
+    </description>
+    <qtgui>
+      <group>
+        <label>Thor Mang</label>
+        <icon type="theme">folder</icon>
+      </group>
+      <label>Supervisor</label>
+      <icon type="theme">preferences-desktop-keyboard</icon>
+      <statustip>FeetWrist GUI plugin for Thor-Mang robot</statustip>
+    </qtgui>
+  </class>
+
+<class name="LidarControlPlugin" type="thor_mang_supervisor.lidar_control_widget.LidarControlDialog" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      LidarControl GUI plugin for Thor-Mang robot
+    </description>
+    <qtgui>
+      <group>
+        <label>Thor Mang</label>
+        <icon type="theme">folder</icon>
+      </group>
+      <label>Supervisor</label>
+      <icon type="theme">preferences-desktop-keyboard</icon>
+      <statustip>LidarControl GUI plugin for Thor-Mang robot</statustip>
+    </qtgui>
+  </class>
+
+<class name="LightControlPlugin" type="thor_mang_supervisor.light_control_widget.LightControlDialog" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      LightControl GUI plugin for Thor-Mang robot
+    </description>
+    <qtgui>
+      <group>
+        <label>Thor Mang</label>
+        <icon type="theme">folder</icon>
+      </group>
+      <label>Supervisor</label>
+      <icon type="theme">preferences-desktop-keyboard</icon>
+      <statustip>LightControl GUI plugin for Thor-Mang robot</statustip>
+    </qtgui>
+  </class>
+
+<class name="StateControlPlugin" type="thor_mang_supervisor.state_control_widget.StateControlDialog" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      StateControl GUI plugin for Thor-Mang robot
+    </description>
+    <qtgui>
+      <group>
+        <label>Thor Mang</label>
+        <icon type="theme">folder</icon>
+      </group>
+      <label>Supervisor</label>
+      <icon type="theme">preferences-desktop-keyboard</icon>
+      <statustip>StateControl GUI plugin for Thor-Mang robot</statustip>
+    </qtgui>
+  </class>
+
+<class name="SupervisorWidgetPlugin" type="thor_mang_supervisor.supervisor_widget.SupervisorDialog" base_class_type="rqt_gui_py::Plugin">
     <description>
       Supvervision GUI plugin for Thor-Mang robot
     </description>
@@ -13,5 +73,21 @@
       <statustip>Supvervision GUI plugin for Thor-Mang robot</statustip>
     </qtgui>
   </class>
+
+<class name="TorqueControlPlugin" type="thor_mang_supervisor.torque_control_widget.TorqueControlDialog" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      TorqueControl GUI plugin for Thor-Mang robot
+    </description>
+    <qtgui>
+      <group>
+        <label>Thor Mang</label>
+        <icon type="theme">folder</icon>
+      </group>
+      <label>Supervisor</label>
+      <icon type="theme">preferences-desktop-keyboard</icon>
+      <statustip>TorqueControl GUI plugin for Thor-Mang robot</statustip>
+    </qtgui>
+  </class>
+
 </library>
 
