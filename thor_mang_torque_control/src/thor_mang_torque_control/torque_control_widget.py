@@ -98,6 +98,7 @@ class TorqueControlWidget(QObject):
                 for prefix in group.prefix:
                     if joint.startswith(prefix):
                         group.joint_list.append(joint)
+                        # print "Added joint", joint, "to group", group.name
                         matched = True
                         break
                 if matched:
