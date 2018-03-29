@@ -1,7 +1,7 @@
 joints:
   groups:
     finger:
-      prefix: [l_f, r_f]
+#     prefix: Loaded by launchfile
       name: "Fingers"
   
     head:

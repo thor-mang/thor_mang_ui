@@ -14,6 +14,7 @@ from python_qt_binding.QtCore import Qt, QObject, pyqtSignal
 from python_qt_binding.QtGui import QColor, QFont
 from python_qt_binding.QtWidgets import QWidget, QVBoxLayout
 
+from sensor_msgs.msg import JointState
 from robotis_controller_msgs.msg import SyncWriteItem
 from thor_mang_control_msgs.msg import ControlModeStatus, GetControlModesAction, GetControlModesGoal, ChangeControlModeAction, ChangeControlModeGoal
 
@@ -49,11 +50,6 @@ class SupervisorWidget(QObject):
         # load transition parameters
         self._allow_all_mode_transitions_enabled = False
         self._allow_falling_controller_enabled = False
-
-        # load joints from parameter server
-        self.joint_groups = {"Misc": JointGroup("NONE", "Misc")}
-        self.load_groups()
-        self.load_joints()
 
         # start widget
         self._widget = QWidget()
@@ -133,17 +129,24 @@ class SupervisorWidget(QObject):
 
     def load_groups(self):
         groups = rospy.get_param("joints/groups", [])
-        if not groups:
-            return
-
         for group in groups.keys():
             prefix = rospy.get_param("joints/groups/" + group + "/prefix", "not_found")
             name = rospy.get_param("joints/groups/" + group + "/name", "No name found.")
             self.joint_groups[name] = (JointGroup(prefix, name))
 
     def load_joints(self):
-        joint_list = rospy.get_param("joints/joint_list", [])
-        for joint in joint_list:
+        try:
+            msg = rospy.wait_for_message('joints/joint_states', JointState, 1.0)
+        except (rospy.ROSException, rospy.ROSInterruptException):
+            return False
+
+        joint_ignore_list = rospy.get_param("joints/joint_ignore_list", [])
+
+        for joint in msg.name:
+            if any(joint in s for s in joint_ignore_list):
+                # print "Ignored joint", joint
+                continue
+
             matched = False
             for group in self.joint_groups.values():
                 for prefix in group.prefix:
@@ -154,9 +157,11 @@ class SupervisorWidget(QObject):
                         break
                 if matched:
                     break
-            if not matched:
-                self.joint_groups["Misc"].joint_list.append(joint)
-                # print "Added joint", joint, "to group", self.joint_groups["Misc"].name
+            # if not matched:
+            #     self.joint_groups["Misc"].joint_list.append(joint)
+            #     print "Added joint", joint, "to group", self.joint_groups["Misc"].name
+
+        return True
 
     def obtain_control_modes(self):
         if self.get_control_modes_client.wait_for_server(rospy.Duration(1.0)):
@@ -224,6 +229,13 @@ class SupervisorWidget(QObject):
                     self._widget.control_state_list.item(i).setFont(self._inactive_mode_font)
 
     def _handle_send_torque_mode_clicked(self):
+        # load joints from parameter server
+        self.joint_groups = {"Misc": JointGroup("NONE", "Misc")}
+        self.load_groups()
+        if not self.load_joints():
+            rospy.logerr("Couldn't determine joint names. Check if joint states are published.")
+            return
+
         msg = SyncWriteItem()
         msg.item_name = "torque_enable"
 

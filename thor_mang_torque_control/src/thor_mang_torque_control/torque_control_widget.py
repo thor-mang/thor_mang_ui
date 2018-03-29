@@ -10,6 +10,7 @@ from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt, QObject
 from python_qt_binding.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidgetItem
 
+from sensor_msgs.msg import JointState
 from robotis_controller_msgs.msg import SyncWriteItem, RebootDevice
 
 
@@ -48,7 +49,8 @@ class TorqueControlWidget(QObject):
         # load joints from parameter server
         self.joint_groups = [JointGroup(["NONE"], "Misc")]
         self.load_groups()
-        self.load_joints()
+        if not self.load_joints():
+            rospy.logerr("Couldn't determine joint names. Check if joint states are published.")
         self.add_appendage_widgets()
 
         # connect to signals
@@ -79,8 +81,18 @@ class TorqueControlWidget(QObject):
             self.joint_groups.append(JointGroup(prefix, name))
 
     def load_joints(self):
-        joint_list = rospy.get_param("joints/joint_list", [])
-        for joint in joint_list:
+        try:
+            msg = rospy.wait_for_message('joints/joint_states', JointState, 1.0)
+        except (rospy.ROSException, rospy.ROSInterruptException):
+            return False
+
+        joint_ignore_list = rospy.get_param("joints/joint_ignore_list", [])
+
+        for joint in msg.name:
+            if any(joint in s for s in joint_ignore_list):
+                # print "Ignored joint", joint
+                continue
+
             matched = False
             for group in self.joint_groups:
                 for prefix in group.prefix:
@@ -92,6 +104,8 @@ class TorqueControlWidget(QObject):
                     break
             if not matched:
                 self.joint_groups[0].joint_list.append(joint)
+
+        return True
 
     def add_appendage_widgets(self):
         num_of_widgets = 0
