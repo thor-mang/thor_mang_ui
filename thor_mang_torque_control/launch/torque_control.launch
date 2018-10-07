@@ -4,7 +4,7 @@
   <arg name="l_finger_joints" default="$(optenv L_HAND_JOINTS none)" />
   <arg name="r_finger_joints" default="$(optenv R_HAND_JOINTS none)" />
 
-  <node name="thor_mang_torque_control" pkg="thor_mang_torque_control" type="torque_control_rqt" respawn="false" output="screen" />
+  <node name="$(anon thor_mang_torque_control)" pkg="thor_mang_torque_control" type="torque_control_rqt" respawn="false" output="screen" />
 
   <!--Load joints-->
   <rosparam command="load" file="$(find thor_mang_torque_control)/config/thormang3_joint_groups.yaml"/>

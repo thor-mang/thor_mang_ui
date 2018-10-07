@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 
 <launch>
-  <node name="rqt" pkg="rqt_gui" type="rqt_gui" ns="johnny5"/>
+    <node name="$(anon rqt)" pkg="rqt_gui" type="rqt_gui" ns="johnny5"/>
 </launch>

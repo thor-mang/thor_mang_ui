@@ -4,7 +4,7 @@
   <arg name="l_finger_joints" default="$(optenv L_HAND_JOINTS none)" />
   <arg name="r_finger_joints" default="$(optenv R_HAND_JOINTS none)" />
 
-  <node name="supervisor_rqt_widget" pkg="thor_mang_supervisor" type="supervisor_rqt" output="screen" respawn="true" />
+  <node name="$(anon supervisor_rqt_widget)" pkg="thor_mang_supervisor" type="supervisor_rqt" output="screen" respawn="true" />
 
   <!-- Load joints -->
   <rosparam command="load" file="$(find thor_mang_torque_control)/config/thormang3_joint_groups.yaml" />
