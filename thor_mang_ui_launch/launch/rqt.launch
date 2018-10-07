@@ -8,5 +8,5 @@
   <arg name="load_rqt_perspective_cmd" default="--perspective-file $(arg rqt_perspective_path)" if =     "$(eval bool(arg('rqt_perspective_path')))" />
   <arg name="load_rqt_perspective_cmd" default=""                                               unless = "$(eval bool(arg('rqt_perspective_path')))" />
 
-  <node name="$(anon rqt)" pkg="rqt_gui" type="rqt_gui" args="--force-discover $(arg load_rqt_perspective_cmd) $(arg rqt_args)" ns="$(arg ns)" />
+  <node name="$(anon rqt)" pkg="rqt_gui" type="rqt_gui" args="--force-discover $(arg load_rqt_perspective_cmd) $(arg rqt_args)" ns="$(arg ns)" respawn="true" />
 </launch>
