@@ -2,7 +2,7 @@
 
 <launch>
   <arg name="ns" default="johnny5" />
-  <arg name="rviz_profile_path" default="" />
+  <arg name="rviz_profile_path" default="$(find thor_mang_ui_launch)/config/rviz/default.rviz" />
   
   <arg name="load_rviz_profile_cmd" default="-d $(arg rviz_profile_path)"   if =     "$(eval bool(arg('rviz_profile_path')))" />
   <arg name="load_rviz_profile_cmd" default=""                              unless = "$(eval bool(arg('rviz_profile_path')))" />
