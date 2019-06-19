@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="robot_name" default="thormang3" />
+  <arg name="l_hand_type" default="$(optenv L_HAND_TYPE none)" />
+  <arg name="r_hand_type" default="$(optenv R_HAND_TYPE none)" />
+
+  <param name="use_sim_time" value = "False"/>
+
+  <group ns="calibration">
+    <param name="tf_prefix" value="calibration"/>
+
+    <include file="$(find thormang3_description)/launch/load_robot_description.launch">
+      <arg name="robot_name" value="$(arg robot_name)" />
+      <arg name="l_hand_type" value="$(arg l_hand_type)" />
+      <arg name="r_hand_type" value="$(arg r_hand_type)" />
+    </include>
+    
+    <!--param name="use_gui" value="True"/-->
+    <!--remap from="/tf" to="tf" />
+    <remap from="/tf_static" to="tf_static"/-->
+    
+    <node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="-1 0 0 0 0 0 /pelvis_link calibration/pelvis_link 100"/>
+
+    <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /-->
+    <node name="joint_state_publisher" pkg="thor_mang_calibration" type="joint_state_publisher" output="screen"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    
+  </group>
+
+  <node name="thormang3_foot_step_generator" pkg="thormang3_foot_step_generator" type="thormang3_foot_step_generator_node" output="screen" required="true"/>
+  <node name="calibration_widget" pkg="thor_mang_calibration" type="calibration" output="screen" />
+
+</launch>

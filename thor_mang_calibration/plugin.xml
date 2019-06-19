@@ -1,0 +1,17 @@
+<library path="src">
+  <class name="CalibrationWidgetPlugin" type="calibration_widget.CalibrationDialog" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Calibration GUI plugin for Thor-Mang robot
+    </description>
+    <qtgui>
+      <group>
+        <label>Thor Mang</label>
+        <icon type="theme">folder</icon>
+      </group>
+      <label>Calibration</label>
+      <icon type="theme">preferences-desktop-keyboard</icon>
+      <statustip>Calibration GUI plugin for Thor-Mang robot</statustip>
+    </qtgui>
+  </class>
+</library>
+

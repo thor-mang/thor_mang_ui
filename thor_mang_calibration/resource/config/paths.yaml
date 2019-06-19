@@ -1,0 +1,29 @@
+# paths the wizard pages can take
+
+# intro page and summary page don't have to be specified
+
+# 'show' specifies what parts of the robot should remain visible
+# in a rviz preview of which joints are going to be calibrated on each path
+# e.g. 'arm' will show all links with arm in the name, '' will show every link
+
+full calibration:
+    path: ['Pose', 'L_Leg_Hip', 'R_Leg_Hip', 'L_Leg_Knee', 'R_Leg_Knee', 'L_Leg_Ankle', 'R_Leg_Ankle', 'Torso', 'Head', 'L_Arm_Shoulder', 'L_Arm_Elbow', 'L_Arm_Wrist', 'R_Arm_Shoulder', 'R_Arm_Elbow', 'R_Arm_Wrist']
+    show: ''
+    
+arm calibration:
+    path: ['Pose', 'L_Arm_Shoulder', 'L_Arm_Elbow', 'L_Arm_Wrist', 'R_Arm_Shoulder', 'R_Arm_Elbow', 'R_Arm_Wrist']
+    show: 'arm'
+    
+leg calibration:
+    path: ['Pose', 'L_Leg_Hip', 'R_Leg_Hip', 'L_Leg_Knee', 'R_Leg_Knee', 'L_Leg_Ankle', 'R_Leg_Ankle']
+    show: 'leg'
+    
+walking calibration:
+    path: ['Walking_Calibration']
+    show: 'leg_an_r'
+    
+# generates one of each page type
+debug:
+    path: ['Pose', 'L_Leg_Hip', 'Walking_Calibration']
+    show: ''
+    
