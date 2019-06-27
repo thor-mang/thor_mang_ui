@@ -2,17 +2,9 @@
 
 import os
 
-#import rospy
 import rospkg
 
-import rviz
-
-#from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QRadioButton, QVBoxLayout
-from python_qt_binding.QtGui import QPixmap, QColor
-from python_qt_binding.QtCore import QVariant
-
-from page_enum import Pages
 
 from page import Page
 from pose_page import PosePage
@@ -103,7 +95,7 @@ class IntroPage(Page):
             if str(page).find('Pose') != -1:
                 pages.insertWidget(i, PosePage(str(page), 'pose_page.ui', self._wizard))
             elif str(page).find('Walking_Calibration') != -1:
-                pages.insertWidget(i, WalkingCalibrationPage(str(page), 'walking_page.ui', self._wizard))
+                pages.insertWidget(i, WalkingCalibrationPage(str(page), 'calibration_page.ui', self._wizard))
             else:
                 pages.insertWidget(i, CalibrationPage(str(page), 'calibration_page.ui', self._wizard))   
             i += 1
@@ -135,12 +127,12 @@ class IntroPage(Page):
         if self.isVisible():
             self._set_help_text()
             self._hide_buttons()
-        
+
+            self.gridLayout_2.addWidget(self._wizard.rviz_frame_1, 0, 1)
             self._wizard.rviz_frame_1.setVisible(True)
             self._wizard.rviz_frame_1.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
-            self.gridLayout_2.addWidget(self._wizard.rviz_frame_1, 0, 1)
-            self._focus_rviz_view_on_joints(self._wizard.rviz_frame_1, '', 'pelvis')
             self._set_rviz_view(self._wizard.rviz_frame_1, 'Front View')
+            self._focus_rviz_view_on_links(self._wizard.rviz_frame_1, '', 'pelvis')
             self._hide_all_joint_axes(self._wizard.rviz_frame_1)
             
             if self._wizard.path_name != '':

@@ -6,10 +6,9 @@ import rospy
 import rospkg
 
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QRadioButton, QVBoxLayout, QLineEdit, QLabel, QGridLayout, QSpacerItem, QSizePolicy, QFrame
+from python_qt_binding.QtWidgets import QWidget, QRadioButton, QVBoxLayout, QLineEdit, QLabel, QSpacerItem, QSizePolicy, QFrame
 from python_qt_binding.QtGui import QValidator, QDoubleValidator
 
-from std_msgs.msg import Bool
 from sensor_msgs.msg import JointState
 
 from yaml import load, dump
@@ -21,8 +20,6 @@ import math
 
 class PosePage(Page):
 
-    _radioButtons = []
-
     def __init__(self, id, ui_name, wizard = None):
         super(PosePage, self).__init__(id, ui_name, wizard)    
 
@@ -33,6 +30,8 @@ class PosePage(Page):
         f = open(poses_path, 'r')
         self.poses = load(f)
         f.close()
+              
+        self._radioButtons = []
               
         self._buttonLayout = QVBoxLayout()
 
@@ -67,7 +66,7 @@ class PosePage(Page):
             self._wizard.rviz_frame_1.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
             self._wizard.rviz_frame_1.setVisible(True)
             
-            self._focus_rviz_view_on_joints(self._wizard.rviz_frame_1, '', 'pelvis')
+            self._focus_rviz_view_on_links(self._wizard.rviz_frame_1, '', 'pelvis')
             self._set_all_alpha_to_one()
             self._set_rviz_view(self._wizard.rviz_frame_1, 'Front View')
             self._hide_all_joint_axes(self._wizard.rviz_frame_1)
@@ -228,7 +227,7 @@ class PosePage(Page):
             child = self._buttonLayout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
-        
+
         self._add_pose_radio_buttons()
 
         something_checked = False
@@ -236,13 +235,14 @@ class PosePage(Page):
             if button.text() == currently_checked:
                 button.setChecked(True)
                 something_checked = True
-                
+
         if something_checked == False and len(self._radioButtons) != 0:
             self._radioButtons[0].setChecked(True)
 
+
     def _handle_radioButtons(self):
         for button in self._radioButtons:
-            if button.isChecked() and button.text() == self.sender().text():
+            if button.isChecked(): 
                 for edit in self._lineEdits.values():
                     edit.setDisabled(True)
                 for key in self.poses[button.text()].keys():

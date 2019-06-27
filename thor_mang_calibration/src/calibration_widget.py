@@ -7,54 +7,29 @@ import rospkg
 import actionlib
 
 import copy
-
-import std_msgs.msg
-import dynamic_reconfigure.client
-
 import math
 
 import rviz
 
-import time
-import sys
-
-from threading import Thread
-import signal
+import dynamic_reconfigure.client
+from dynamic_reconfigure.msg import ConfigDescription
 
 from rqt_gui_py.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtCore import Qt, QObject, pyqtSignal
-from python_qt_binding.QtGui import QColor, QFont, QPixmap, QValidator, QDoubleValidator, QIntValidator
-from python_qt_binding.QtWidgets import QWidget, QStackedWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QLayout, QPushButton, QSpacerItem, QSizePolicy
+from python_qt_binding.QtWidgets import QWidget
 
-from rosparam import load_file, upload_params
 from yaml import load
-
 from shutil import copyfile
 
 from robotis_controller_msgs.msg import SyncWriteItem
-
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-
 from thormang3_foot_step_generator.msg import FootStepCommand
-
 from thor_mang_control_msgs.msg import ChangeControlModeAction, ControlModeStatus, ChangeControlModeGoal
-
-from thormang3_walking_module_msgs.srv import SetBalanceParam, IsRunning, StartWalking, SetJointFeedBackGain
-from thormang3_walking_module_msgs.msg import BalanceParam, JointFeedBackGain
-from thormang3_manipulation_module_msgs.msg import JointPose
 from std_msgs.msg import String, Bool, Int64
-
 from sensor_msgs.msg import JointState
 
-from page_enum import Pages
 from intro_page import IntroPage
-from pose_page import PosePage
-from calibration_page import CalibrationPage
-from walking_page import WalkingCalibrationPage
-from summary_page import SummaryPage
-
-from thor_mang_calibration.msg import Joints
+#from thor_mang_calibration.msg import Joints
 
 class CalibrationDialog(Plugin):
     def __init__(self, context):
@@ -100,6 +75,7 @@ class CalibrationWizard(QWidget):
             self.rviz_frames = {1: self.rviz_frame_1, 2: self.rviz_frame_2, 3: self.rviz_frame_3}
             
             self.pages.insertWidget(0, IntroPage('Intro', 'intro_page.ui', self))#enum.value - 1, IntroPage(enum, 'intro_page.ui', self))
+            self.pages.setCurrentIndex(0)
 
             # set window title
             if context.serial_number() > 1:
@@ -109,6 +85,17 @@ class CalibrationWizard(QWidget):
             context.add_widget(self)
 
             self._create_publishers_and_clients()
+            
+            ns = rospy.get_namespace()
+            self.sub = rospy.Subscriber(ns + 'joint_offsets/parameter_descriptions', ConfigDescription, self._parse_offset_config)
+            
+            msg = JointState()
+        
+            for joint in self.pose:
+                msg.name.append(joint)           
+                msg.position.append(math.radians(self.pose[joint]))
+            
+            self.preview_pose_pub.publish(msg)
             
             self.torque_off_radio_button.setChecked(True)
         else:
@@ -147,31 +134,35 @@ class CalibrationWizard(QWidget):
         
         self.sync_write_pub = rospy.Publisher("robotis/sync_write_item", SyncWriteItem, queue_size=10)
         
-        
-        
         self.preview_pose_pub = rospy.Publisher("calibration/preview_pose", JointState, queue_size=10)
         self.show_turning_dir_pub = rospy.Publisher("calibration/show_joint_turning_direction", Bool, queue_size=10)        
-        self.turning_joints_pub = rospy.Publisher("calibration/turning_joints", Joints, queue_size=10)
+        self.turning_joint_pub = rospy.Publisher("calibration/turning_joint", String, queue_size=10)
         
-        
-        
-        #self.pose_pub = rospy.Publisher("robotis/manipulation/joint_pose_msg", JointPose, queue_size=10)
         self.ini_pose_pub = rospy.Publisher("robotis/base/ini_pose", String, queue_size=10)
-        
         
         ns = rospy.get_namespace()
         self.trajectory_controller_names = rospy.get_param(ns + 'control_mode_switcher/control_mode_to_controllers/whole_body/desired_controllers_to_start')
         self.trajectory_controllers = []
         self.trajectory_controller_joints = []
         
-        
-        self.allow_all_mode_transitions_pub = rospy.Publisher(ns + 'control_mode_switcher/allow_all_mode_transitions', std_msgs.msg.Bool, queue_size=1)
+        self.allow_all_mode_transitions_pub = rospy.Publisher(ns + 'control_mode_switcher/allow_all_mode_transitions', Bool, queue_size=1)
         self.control_mode_status = rospy.Subscriber(ns + "control_mode_switcher/status", ControlModeStatus, self._log_status)
         self.set_control_mode_client = actionlib.SimpleActionClient(ns + "control_mode_switcher/change_control_mode", ChangeControlModeAction)
         
         for name in self.trajectory_controller_names:
             self.trajectory_controllers.append(rospy.Publisher(ns + 'joints/' + name + '/command', JointTrajectory, queue_size=10))
             self.trajectory_controller_joints.append(rospy.get_param(ns + 'joints/' + name + '/joints'))
+
+    def _parse_offset_config(self, data):
+        self._parse_config_to_dict(data.min, self.offset_mins)
+        self._parse_config_to_dict(data.max, self.offset_maxs)
+
+
+    def _parse_config_to_dict(self, conf, dictionary):
+        for limits in [conf.bools, conf.ints, conf.strs, conf.doubles]:
+            for i in range(0, len(limits)):
+                name = limits[i].name
+                dictionary[name] = limits[i].value
 
     
     def _init_pose(self):
@@ -183,8 +174,7 @@ class CalibrationWizard(QWidget):
         pose = poses[poses.keys()[0]]
 
         return pose
-
-    
+        
     def _load_from_config(self, file_name):
         rp = rospkg.RosPack()
         file_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', file_name)  
@@ -209,6 +199,9 @@ class CalibrationWizard(QWidget):
         self.torque_on = False
         
         self.current_control_mode = ''
+        
+        self.offset_mins = {}
+        self.offset_maxs = {}
         
         
     def _connect_ui_signals(self):
@@ -271,6 +264,9 @@ class CalibrationWizard(QWidget):
         
         self._show_all_ui_elements()
         self.enable_all_rviz_check.setChecked(False)
+        self.torque_on_radio_button.setChecked(False)
+        self.torque_off_radio_button.setChecked(True)
+        self.walking_module_disable_radio_button.setChecked(False)
         
         self.pages.setCurrentIndex(0)
         
@@ -396,7 +392,7 @@ class CalibrationWizard(QWidget):
 
             trajectory = JointTrajectory()
             trajectory.joint_names = names
-            trajectory.points = self._get_trajectory_from_target_point(target_point, 4)
+            trajectory.points = self._get_trajectory_from_target_point(target_point, 1)
             joint_trajectories.append(trajectory)
 
         return joint_trajectories

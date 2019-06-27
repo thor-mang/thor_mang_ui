@@ -24,7 +24,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <layout class="QGridLayout" name="gridLayout_21">
+    <layout class="QGridLayout" name="page_layout">
      <property name="sizeConstraint">
       <enum>QLayout::SetMinAndMaxSize</enum>
      </property>
@@ -38,7 +38,7 @@
      <item row="0" column="4">
       <widget class="QGroupBox" name="box3">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -65,51 +65,19 @@
         <property name="sizeConstraint">
          <enum>QLayout::SetNoConstraint</enum>
         </property>
+        <property name="topMargin">
+         <number>6</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
         <item row="0" column="0">
-         <layout class="QGridLayout" name="box3_layout">
+         <layout class="QGridLayout" name="box3_layout" rowstretch="0,1,0,0">
           <property name="sizeConstraint">
            <enum>QLayout::SetMinAndMaxSize</enum>
           </property>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="box3_enable_rviz_check">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>14</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Enable RVIZ Frame</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="box3_show_axes_check">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Show Axes</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0" colspan="2">
-           <widget class="QLabel" name="box3_img">
+           <widget class="QLabel" name="box3_display">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>
@@ -124,8 +92,8 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>300</width>
-              <height>300</height>
+              <width>16777215</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="baseSize">
@@ -135,7 +103,7 @@
              </size>
             </property>
             <property name="text">
-             <string>img</string>
+             <string>display</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -316,6 +284,54 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QGroupBox" name="box3_enable_rviz_check">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+              <kerning>true</kerning>
+             </font>
+            </property>
+            <property name="title">
+             <string>Enable RVIZ Frame</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_11">
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="box3_show_axes_check">
+               <property name="text">
+                <string>Show Axes</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="box3_show_animation_check">
+               <property name="text">
+                <string>Animate Rotation</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -324,7 +340,7 @@
      <item row="0" column="0">
       <widget class="QGroupBox" name="box1">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -351,51 +367,19 @@
         <property name="sizeConstraint">
          <enum>QLayout::SetNoConstraint</enum>
         </property>
+        <property name="topMargin">
+         <number>6</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
         <item row="0" column="0">
-         <layout class="QGridLayout" name="box1_layout">
+         <layout class="QGridLayout" name="box1_layout" rowstretch="0,1,0,0">
           <property name="sizeConstraint">
            <enum>QLayout::SetMinAndMaxSize</enum>
           </property>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="box1_enable_rviz_check">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>14</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Enable RVIZ Frame</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="box1_show_axes_check">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Show Axes</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0" colspan="2">
-           <widget class="QLabel" name="box1_img">
+           <widget class="QLabel" name="box1_display">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>
@@ -410,8 +394,8 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>300</width>
-              <height>300</height>
+              <width>16777215</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="baseSize">
@@ -421,7 +405,7 @@
              </size>
             </property>
             <property name="text">
-             <string>img</string>
+             <string>display</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -602,6 +586,54 @@
             </item>
            </layout>
           </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QGroupBox" name="box1_enable_rviz_check">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+              <kerning>true</kerning>
+             </font>
+            </property>
+            <property name="title">
+             <string>Enable RVIZ Frame</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_5">
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="box1_show_axes_check">
+               <property name="text">
+                <string>Show Axes</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="box1_show_animation_check">
+               <property name="text">
+                <string>Animate Rotation</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -617,7 +649,7 @@
      <item row="0" column="2">
       <widget class="QGroupBox" name="box2">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -644,8 +676,14 @@
         <property name="sizeConstraint">
          <enum>QLayout::SetNoConstraint</enum>
         </property>
+        <property name="topMargin">
+         <number>6</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
         <item row="0" column="0">
-         <layout class="QGridLayout" name="box2_layout">
+         <layout class="QGridLayout" name="box2_layout" rowstretch="0,1,0,0">
           <property name="sizeConstraint">
            <enum>QLayout::SetMinAndMaxSize</enum>
           </property>
@@ -801,44 +839,6 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="box2_enable_rviz_check">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>14</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Enable RVIZ Frame</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="box2_show_axes_check">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Show Axes</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="0" colspan="2">
            <widget class="QLabel" name="box2_tip">
             <property name="sizePolicy">
@@ -862,7 +862,7 @@
            </widget>
           </item>
           <item row="1" column="0" colspan="2">
-           <widget class="QLabel" name="box2_img">
+           <widget class="QLabel" name="box2_display">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>
@@ -877,8 +877,8 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>300</width>
-              <height>300</height>
+              <width>16777215</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="baseSize">
@@ -888,11 +888,59 @@
              </size>
             </property>
             <property name="text">
-             <string>img</string>
+             <string>display</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
             </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QGroupBox" name="box2_enable_rviz_check">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+              <kerning>true</kerning>
+             </font>
+            </property>
+            <property name="title">
+             <string>Enable RVIZ Frame</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_6">
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="box2_show_axes_check">
+               <property name="text">
+                <string>Show Axes</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="box2_show_animation_check">
+               <property name="text">
+                <string>Animate Rotation</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>

@@ -2,10 +2,6 @@
 
 import os
 
-#import copy
-#import math
-#import time
-
 import rospy
 import rospkg
 
@@ -17,11 +13,8 @@ from python_qt_binding.QtGui import QValidator, QDoubleValidator, QIntValidator
 from python_qt_binding.QtWidgets import QWidget, QFrame, QLayout
 
 from thor_mang_calibration.msg import Joints
+from std_msgs.msg import String
 
-#from robotis_controller_msgs.msg import SyncWriteItem
-#from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-
-#from page_enum import Pages
 
 class Page(QWidget):
 
@@ -91,10 +84,10 @@ class Page(QWidget):
 
         return line
 
-    def _publish_visualized_joints(self, joints):
-        msg = Joints()
-        msg.joints = joints
-        self._wizard.turning_joints_pub.publish(msg)
+    def _publish_visualized_joint(self, joint):
+        msg = String()
+        msg = joint
+        self._wizard.turning_joint_pub.publish(msg)
 
     def _set_help_text(self):
         if 'page_help_text' in self._wizard.page_config[self._id]:
@@ -120,12 +113,14 @@ class Page(QWidget):
                 return root_display_group.getDisplayAt(i)
                 
         
-    def _focus_rviz_view_on_joints(self, rviz_frame, joint, previous_joint):
+    def _focus_rviz_view_on_links(self, rviz_frame, joint, previous_joint):
         joint = joint + '_link'
         previous_joint = previous_joint + '_link'
     
         visualization_manager = rviz_frame.getManager()
         visualization_manager.setFixedFrame('calibration/' + previous_joint)
+        visualization_manager.getViewManager().getCurrent().subProp('Target Frame').setValue("calibration/" + joint)
+        visualization_manager.getViewManager().getCurrent().subProp('Focal Point').setValue("0; 0; 0")
         
         robot_model = self._get_robot_state_display(rviz_frame)
         

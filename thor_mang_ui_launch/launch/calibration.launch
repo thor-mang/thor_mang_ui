@@ -1,0 +1,10 @@
+<launch>
+    <arg name="preview_turning_speed" default="5.0"/>
+    <arg name="rate" default="10"/>
+    <group ns="johnny5">
+        <include file="$(find thor_mang_calibration)/launch/calibration.launch">
+            <arg name="preview_turning_speed" value="$(arg preview_turning_speed)"/>
+            <arg name="rate" value="$(arg rate)"/>
+        </include>
+    </group>
+</launch>

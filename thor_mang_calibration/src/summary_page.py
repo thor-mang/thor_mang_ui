@@ -3,23 +3,13 @@
 import copy
 import os
 
-import rospy
 import rospkg
-
-import dynamic_reconfigure.client
 
 from yaml import load
 
-from python_qt_binding import loadUi
-from python_qt_binding.QtCore import QCoreApplication
-from python_qt_binding.QtWidgets import QWidget, QLabel, QLineEdit, QSpacerItem, QSizePolicy, QFrame
-
-from page_enum import Pages
+from python_qt_binding.QtWidgets import QLabel, QLineEdit, QSpacerItem, QSizePolicy, QFrame
 
 from page import Page
-
-#from calibration_widget import finish
-
 
 class SummaryPage(Page):
     def __init__(self, id, ui_name, wizard = None):
