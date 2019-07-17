@@ -2,6 +2,6 @@
 
 <launch>
   <include file="$(find l3_footstep_planning)/launch/step_interface_rqt.launch">
-    <arg name="namespace" value="johnny5/footstep_planning" />
+    <arg name="ns" value="johnny5/footstep_planning" />
   </include>
 </launch> 
