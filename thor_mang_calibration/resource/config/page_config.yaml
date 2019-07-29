@@ -1,0 +1,303 @@
+# the key 'page_help_text' is the help text to be displayed underneath the page
+
+# the key 'joint_specific_help' is optional and can be used to give additional 
+# information about one joint and will be displayed underneath that joint
+
+# the key 'link name' is optional and can be used to give a different name for
+# the link connecting from the joint, if it doesn't follow the pattern of:
+# (joint name)_link, e.g. l_leg_hip_yaw_link
+
+Intro:
+    page_help_text: >-
+        <span style=" font-weight:600;">Thormang Calibration</span></p><p>
+        This wizard will guide you through the calibration of a thormang3 robot.<br/>
+        Please pick a calibration path.
+    
+Pose:
+    page_help_text: >-
+        Please pick a pose for the calibration.<br/>You may define your own pose under Custom.
+    
+Walking_Calibration:
+    num_joints: 2
+    page_help_text: >-
+        Adjust the roll angles of both ankles for a better walking performance.<br/>
+        Test the walking performance of the robot with the walking panel setup on the right.
+    1:
+        name: l_leg_an_r
+        previous: l_leg_an_p
+        rotation: roll
+        pic: 'ankle_roll.png'
+        rviz view: 'Close Front View'
+    2:
+        name: r_leg_an_r
+        previous: r_leg_an_p
+        rotation: roll
+        pic: 'ankle_roll.png'
+        rviz view: 'Close Front View'
+    
+Summary:
+    page_help_text: >-
+        <span style=" font-weight:600;">Summary</span></p><p>
+        Go over the current calibration and check that everything is correct.<br/>
+        Your calibration can be saved, reseted, or kept for now but discarded later (no save).
+
+L_Leg_Hip: 
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 3
+    1:
+        name: l_leg_hip_y
+        previous: pelvis
+        rotation: yaw
+        joint_specific_help: 'I am a presentation decoy'
+        pic: 'hip_yaw.png'
+        rviz view: 'Close Left Side View'
+    2:
+        name: l_leg_hip_r
+        rotation: roll
+        pic: 'hip_roll.png'
+        rviz view: 'Close Left Side View'
+    3:
+        name: l_leg_hip_p
+        rotation: pitch
+        pic: 'hip_pitch.png'
+        rviz view: 'Close Left Side View'
+        
+R_Leg_Hip:
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 3
+    1:
+        name: r_leg_hip_y
+        previous: pelvis
+        rotation: yaw
+        pic: 'hip_yaw.png'
+        rviz view: 'Close Right Side View'
+    2:
+        name: r_leg_hip_r
+        rotation: roll
+        pic: 'hip_roll.png'
+        rviz view: 'Close Right Side View'
+    3:
+        name: r_leg_hip_p
+        rotation: pitch
+        pic: 'hip_pitch.png'
+        rviz view: 'Close Right Side View'
+        
+L_Leg_Knee: 
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 1
+    1:
+        name: l_leg_kn_p
+        previous: l_leg_hip_p
+        rotation: pitch
+        pic: 'knee_pitch.png'
+        rviz view: 'Close Left Side View'
+
+R_Leg_Knee:
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 1
+    1:
+        name: r_leg_kn_p
+        previous: r_leg_hip_p
+        rotation: pitch
+        pic: 'knee_pitch.png'
+        rviz view: 'Close Right Side View'
+
+L_Leg_Ankle: 
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 2
+    1:
+        name: l_leg_an_p
+        previous: l_leg_kn_p
+        rotation: pitch
+        pic: 'ankle_pitch.png'
+        rviz view: 'Close Front View'
+    2:
+        name: l_leg_an_r
+        rotation: roll
+        pic: 'ankle_roll.png'
+        rviz view: 'Close Front View'
+
+R_Leg_Ankle: 
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 2
+    1:
+        name: r_leg_an_p
+        previous: r_leg_kn_p
+        rotation: pitch
+        pic: 'ankle_pitch.png'
+        rviz view: 'Close Front View'
+    2:
+        name: r_leg_an_r
+        rotation: roll
+        pic: 'ankle_roll.png'
+        rviz view: 'Close Front View'
+Torso:
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 1
+    1:
+        name: torso_y
+        link name: chest
+        previous: pelvis
+        rotation: yaw
+        pic: 'torso_yaw.png'
+        rviz view: 'Front View'
+
+Head:
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 2
+    1:
+        name: head_y
+        previous: chest
+        rotation: yaw
+        pic: 'head_yaw.png'
+        rviz view: 'Close Front View'
+    2:
+        name: head_p
+        rotation: pitch
+        pic: 'head_pitch.png'
+        rviz view: 'Close Left Side View'
+
+L_Arm_Shoulder:
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 3
+    1:
+        name: l_arm_sh_p1
+        previous: chest
+        rotation: pitch1
+        pic: 'shoulder_pitch1.png'
+        rviz view: 'Close Left Top View'
+    2:
+        name: l_arm_sh_r
+        rotation: roll
+        pic: 'shoulder_roll.png'
+        rviz view: 'Close Left Top View'
+    3:
+        name: l_arm_sh_p2
+        rotation: pitch2
+        pic: 'shoulder_pitch2.png'
+        rviz view: 'Close Top View'
+
+L_Arm_Elbow:
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 1
+    1:
+        name: l_arm_el_y
+        previous: l_arm_sh_p2
+        rotation: yaw
+        pic: 'elbow_yaw.png'
+        rviz view: 'Close Top View'
+
+L_Arm_Wrist:
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 3
+    1:
+        name: l_arm_wr_r
+        previous: l_arm_el_y
+        rotation: roll
+        pic: 'wrist_roll.png'
+        rviz view: 'Close Left Side View'
+    2:
+        name: l_arm_wr_y
+        rotation: yaw
+        pic: 'wrist_yaw.png'
+        rviz view: 'Close Left Side View'
+    3:
+        name: l_arm_wr_p
+        rotation: pitch
+        pic: 'wrist_pitch.png'
+        rviz view: 'Close Top View'
+
+R_Arm_Shoulder:
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 3
+    1:
+        name: r_arm_sh_p1
+        previous: chest
+        rotation: pitch1
+        pic: 'shoulder_pitch1.png'
+        rviz view: 'Close Right Top View'
+    2:
+        name: r_arm_sh_r
+        rotation: roll
+        pic: 'shoulder_roll.png'
+        rviz view: 'Close Right Top View'
+    3:
+        name: r_arm_sh_p2
+        rotation: pitch2
+        pic: 'shoulder_pitch2.png'
+        rviz view: 'Close Top View'
+
+R_Arm_Elbow:
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 1
+    1:
+        name: r_arm_el_y
+        previous: r_arm_sh_p2
+        rotation: yaw
+        pic: 'elbow_yaw.png'
+        rviz view: 'Close Top View'
+
+R_Arm_Wrist:
+    page_help_text: >-
+        Go over the joints from left to right. <br/> 
+        Align the indicated joints by pressing + or -. <br/>
+        The rviz window shows the positive turning direction.
+    num_joints: 3
+    1:
+        name: r_arm_wr_r
+        previous: r_arm_el_y
+        rotation: roll
+        pic: 'wrist_roll.png'
+        rviz view: 'Close Right Side View'
+    2:
+        name: r_arm_wr_y
+        rotation: roll
+        pic: 'wrist_yaw.png'
+        rviz view: 'Close Right Side View'
+    3:
+        name: r_arm_wr_p
+        rotation: pitch
+        pic: 'wrist_pitch.png'
+        rviz view: 'Close Top View'
+        
+        
+order: [shoulder, elbow, wrist, hip, knee, ankle, head, torso]

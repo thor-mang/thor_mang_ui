@@ -1,0 +1,126 @@
+#!/usr/bin/env python
+
+import rospy
+import signal
+import math
+import xml.dom.minidom
+
+from threading import Thread
+
+from std_msgs.msg import Bool, String
+from sensor_msgs.msg import JointState
+from thor_mang_calibration.msg import Joints
+
+class JointStatePublisher:
+    def __init__(self):
+        robot_description = rospy.get_param('robot_description')
+        self._robot = xml.dom.minidom.parseString(robot_description).getElementsByTagName('robot')[0]
+        self._joint_names = self._get_joints_from_robot()
+        
+        self._hz = 10
+        if rospy.has_param('rate'):
+            self._hz = rospy.get_param('rate')
+        
+        self._turning_speed = 5.0
+        if rospy.has_param('preview_turning_speed'):
+            self._turning_speed = rospy.get_param('preview_turning_speed')
+        
+        print('calibration/joint_state_publisher: updating with ' + str(self._hz) + 
+            ' Hz and using a turning speed of ' + str(self._turning_speed) + ' deg/s')
+        
+        self._angle_difference = math.radians(self._turning_speed / self._hz)
+
+        self._turning_range = math.radians(20)
+        
+        self._preview_pose = {}
+        self._show_turning_direction = False
+        self._turning_joint = ''
+        self._turning_joint_old_position = 0.0
+        
+        self._joint_state_message = JointState()
+        self._joint_state_message.name = self._joint_names
+        self._joint_state_message.position.extend([0] * len(self._joint_names))
+        #self._joint_state_message.velocity.extend([0] * len(self._joint_names))
+        
+        self.preview_pose_sub = rospy.Subscriber("preview_pose", JointState, self._receive_preview_pose)
+        self.show_turning_dir_pub = rospy.Subscriber("show_joint_turning_direction", Bool, self._receive_show_turning_dir) 
+        self.turning_joint_pub = rospy.Subscriber("turning_joint", String, self._receive_turning_joint)
+        
+        self.publisher = rospy.Publisher('joint_states', JointState, queue_size = 10)
+        
+    def _receive_preview_pose(self, data):
+        for i in range(0, len(data.name)):
+            self._preview_pose[data.name[i]] = data.position[i]
+            
+    def _receive_show_turning_dir(self, data):
+        self._show_turning_direction = data.data
+        
+    def _receive_turning_joint(self, data):
+        self._preview_pose_to_position()
+        self._turning_joint = data.data
+        self._turning_joint_old_position = self._preview_pose[self._turning_joint]
+        
+        
+    def _get_joints_from_robot(self):
+        joint_names = []
+        
+        for child in self._robot.childNodes:
+            if child.localName == 'joint':
+                if not child.getAttribute('type') in ['fixed', 'floating', 'planar']:
+                    joint_names.append(child.getAttribute('name'))
+                    #limit = child.getElementsByTagName('limit')[0]
+                    #print(str(child.getAttribute('name')) + ' limit?: ' + str(math.degrees(float(limit.getAttribute('lower')))))
+                
+        return joint_names
+        
+    def _preview_pose_to_position(self):
+        for i in range(0, len(self._joint_state_message.name)):
+            name = self._joint_state_message.name[i]
+            if name in self._preview_pose.keys():
+                self._joint_state_message.position[i] = self._preview_pose[name]
+        
+    def _turn_joints(self):
+        for i in range(0, len(self._joint_state_message.name)):
+            name = self._joint_state_message.name[i]
+            if name == self._turning_joint:
+                current_position = self._joint_state_message.position[i] 
+                self._joint_state_message.position[i] = self._calculate_new_position(name, i)
+                self._turning_joint_old_position = current_position
+        
+    def _calculate_new_position(self, joint, i):
+        max_val = self._preview_pose[joint] + self._turning_range / 2.0
+        min_val = self._preview_pose[joint] - self._turning_range / 2.0
+        
+        new_val = self._turning_joint_old_position + self._angle_difference
+        
+        if new_val >= max_val:
+            new_val = min_val
+            
+        return new_val
+        
+    def loop(self):
+        r = rospy.Rate(self._hz)
+        while not rospy.is_shutdown():
+            self._joint_state_message.header.stamp = rospy.Time.now()
+            
+            # do other stuff here
+            if self._show_turning_direction:
+                self._turn_joints()
+            else:
+                self._preview_pose_to_position()
+            
+            self.publisher.publish(self._joint_state_message)
+            r.sleep()
+
+        
+if __name__ == '__main__':
+    try:
+        rospy.init_node('joint_state_publisher')
+        jsp = JointStatePublisher()
+
+        Thread(target=jsp.loop).start()
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        
+    except Exception as e:
+        print('Error in joint_state_publisher: ' + str(e))
+pass
