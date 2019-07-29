@@ -1,21 +1,19 @@
 #!/usr/bin/env python
 
+import math
 import rospy
 import signal
-import math
+import sys
 import xml.dom.minidom
-
-from threading import Thread
 
 from std_msgs.msg import Bool, String
 from sensor_msgs.msg import JointState
-from thor_mang_calibration.msg import Joints
 
 class JointStatePublisher:
     def __init__(self):
         robot_description = rospy.get_param('robot_description')
         self._robot = xml.dom.minidom.parseString(robot_description).getElementsByTagName('robot')[0]
-        self._joint_names = self._get_joints_from_robot()
+        self._joint_names, self._joint_limits = self._get_joints_information_from_robot()
         
         self._hz = 10
         if rospy.has_param('rate'):
@@ -32,7 +30,7 @@ class JointStatePublisher:
 
         self._turning_range = math.radians(20)
         
-        self._preview_pose = {}
+        self._preview_pose = self._set_zero_pose(self._joint_names)
         self._show_turning_direction = False
         self._turning_joint = ''
         self._turning_joint_old_position = 0.0
@@ -43,10 +41,12 @@ class JointStatePublisher:
         #self._joint_state_message.velocity.extend([0] * len(self._joint_names))
         
         self.preview_pose_sub = rospy.Subscriber("preview_pose", JointState, self._receive_preview_pose)
-        self.show_turning_dir_pub = rospy.Subscriber("show_joint_turning_direction", Bool, self._receive_show_turning_dir) 
-        self.turning_joint_pub = rospy.Subscriber("turning_joint", String, self._receive_turning_joint)
+        self.show_turning_dir_sub = rospy.Subscriber("show_joint_turning_direction", Bool, self._receive_show_turning_dir) 
+        self.turning_joint_sub = rospy.Subscriber("turning_joint", String, self._receive_turning_joint)
         
         self.publisher = rospy.Publisher('joint_states', JointState, queue_size = 10)
+        
+        #rospy.on_shutdown(self._shutdown)
         
     def _receive_preview_pose(self, data):
         for i in range(0, len(data.name)):
@@ -61,17 +61,31 @@ class JointStatePublisher:
         self._turning_joint_old_position = self._preview_pose[self._turning_joint]
         
         
-    def _get_joints_from_robot(self):
+    def _get_joints_information_from_robot(self):
         joint_names = []
+        joint_limits = {}
         
         for child in self._robot.childNodes:
             if child.localName == 'joint':
                 if not child.getAttribute('type') in ['fixed', 'floating', 'planar']:
-                    joint_names.append(child.getAttribute('name'))
-                    #limit = child.getElementsByTagName('limit')[0]
-                    #print(str(child.getAttribute('name')) + ' limit?: ' + str(math.degrees(float(limit.getAttribute('lower')))))
+                    name = child.getAttribute('name')
+                    joint_names.append(name)
+
+                    limit = child.getElementsByTagName('limit')[0]
+
+                    if child.getAttribute('type') == 'continuous':
+                        joint_limits[name] = {'min': -math.pi, 'max': math.pi}
+                    else:
+                        joint_limits[name] = {'min': float(limit.getAttribute('lower')), 'max': float(limit.getAttribute('upper'))}
                 
-        return joint_names
+        return joint_names, joint_limits
+        
+    def _set_zero_pose(self, joint_names):
+        zero_pose = {}
+        for name in joint_names:
+            zero_pose[name] = 0.0
+            
+        return zero_pose
         
     def _preview_pose_to_position(self):
         for i in range(0, len(self._joint_state_message.name)):
@@ -91,12 +105,42 @@ class JointStatePublisher:
         max_val = self._preview_pose[joint] + self._turning_range / 2.0
         min_val = self._preview_pose[joint] - self._turning_range / 2.0
         
+        max_val, min_val = self._adjust_animation_range_to_joint_limits(max_val, min_val, joint)
+        
         new_val = self._turning_joint_old_position + self._angle_difference
         
         if new_val >= max_val:
             new_val = min_val
             
         return new_val
+        
+    def _adjust_animation_range_to_joint_limits(self, max_val, min_val, joint):
+        upper_limit = self._joint_limits[joint]['max']
+        lower_limit = self._joint_limits[joint]['min']
+        
+        difference = 0
+        if max_val > upper_limit:
+            difference = max_val - upper_limit
+            max_val = upper_limit
+
+        # to keep full movement range lower min_value accordingly
+        if difference != 0:
+            min_val -= difference
+            
+        difference = 0            
+        if min_val < lower_limit:
+            difference = abs(lower_limit - min_val)
+            min_val = lower_limit
+            
+        # to keep full movement range up max_value accordingly
+        if difference != 0:
+            max_val += difference
+            
+        # if max_val now exceeds the upper limit, set back
+        if max_val > upper_limit:
+            max_val = upper_limit
+            
+        return max_val, min_val
         
     def loop(self):
         r = rospy.Rate(self._hz)
@@ -118,9 +162,8 @@ if __name__ == '__main__':
         rospy.init_node('joint_state_publisher')
         jsp = JointStatePublisher()
 
-        Thread(target=jsp.loop).start()
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-        
+        jsp.loop()
+                
     except Exception as e:
         print('Error in joint_state_publisher: ' + str(e))
 pass

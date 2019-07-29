@@ -7,10 +7,6 @@ import rospkg
 from python_qt_binding.QtWidgets import QRadioButton, QVBoxLayout
 
 from page import Page
-from pose_page import PosePage
-from calibration_page import CalibrationPage
-from walking_page import WalkingCalibrationPage
-from summary_page import SummaryPage
 
 class IntroPage(Page):
     pix_full = 0
@@ -21,23 +17,25 @@ class IntroPage(Page):
         super(IntroPage, self).__init__(id, ui_name, wizard)        
         
         # add rviz frame to layout
-        self.gridLayout_2.addWidget(self._wizard.rviz_frame_1, 0, 1)
+        frame = self._wizard.rviz_frames[1]
+        self.gridLayout_2.addWidget(frame, 1, 1)
         
         # hide buttons not needed on this page
         self._hide_buttons()
         self._set_help_text()
         
-        self._radioButtons = []
-        self._buttonLayout = QVBoxLayout()
-        self._add_path_radio_buttons()
-
+        paths = self._wizard.paths        
+        keys = paths.keys()
+        
+        for key in sorted(keys):
+            self.paths_list.addItem(str(key))
         
         # first button as default calibration mode
-        self._radioButtons[0].setChecked(True)
+        self.paths_list.currentItemChanged.connect(self._handle_pages_list_changed)
+        frame.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
         
-        self._wizard.rviz_frame_1.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
+        self.paths_list.setCurrentRow(0)
         
-
     def _hide_buttons(self):
         self._wizard.back_button.setVisible(False)
         self._wizard.finish_button.setVisible(False)
@@ -45,72 +43,13 @@ class IntroPage(Page):
         self._wizard.header_widget.setVisible(False)
         self._wizard.line_4.setVisible(False)
         
-    def _add_path_radio_buttons(self):
+    def _handle_pages_list_changed(self):
         paths = self._wizard.paths
-        
-        keys = paths.keys()
-        
-        i = 0
-
-        for key in sorted(keys):
-            self._radioButtons.append(QRadioButton(str(key)))
-            self._buttonLayout.addWidget(self._radioButtons[i])
-            self._radioButtons[i].toggled.connect(self._handle_radioButtons)
-            i += 1
-
-        self._buttonLayout.addStretch()
-        self.paths_groupBox.setLayout(self._buttonLayout)
-            
-    
-    def _setup_pages(self):
-        path_picked = self._get_current_button_text()
-             
-        if path_picked != self._wizard.path_name:
-        
-            pages = self._wizard.pages
-        
-            self._clear_pages()
-            self._add_pages()
-            
-            self._wizard.page_list.clear()
-            self._add_pages_to_list()
-            
-        
-    def _clear_pages(self):
-        pages = self._wizard.pages
-        
-        if pages.count() > 1:
-            for i in reversed(range(2, pages.count() + 1)):
-                pages.removeWidget(pages.widget(i))
-    
-    
-    def _add_pages(self):
-        pages = self._wizard.pages
-        path = self._wizard.paths[self._get_current_button_text()]['path']
-        self._wizard.path = ['Intro'] + path + ['Summary']
-        
-        i = 1
-            
-        for page in path:
-            if str(page).find('Pose') != -1:
-                pages.insertWidget(i, PosePage(str(page), 'pose_page.ui', self._wizard))
-            elif str(page).find('Walking_Calibration') != -1:
-                pages.insertWidget(i, WalkingCalibrationPage(str(page), 'calibration_page.ui', self._wizard))
-            else:
-                pages.insertWidget(i, CalibrationPage(str(page), 'calibration_page.ui', self._wizard))   
-            i += 1
-                
-        pages.insertWidget(i, SummaryPage('Summary', 'summary_page.ui', self._wizard))
-        
-    def _handle_radioButtons(self):
-        paths = self._wizard.paths
-        if self.sender().isChecked():
-            sender_text = self.sender().text()
-            self._set_alpha(paths[sender_text]['show'])
-            
+        self._set_alpha(paths[self.paths_list.currentItem().text()]['show'])
         
     def _set_alpha(self, part):
-        robot_display = self._get_robot_state_display(self._wizard.rviz_frame_1)
+        frame = self._wizard.rviz_frames[1]
+        robot_display = self._get_robot_state_display(frame)
          
         links = robot_display.subProp('Links')
                 
@@ -127,24 +66,23 @@ class IntroPage(Page):
         if self.isVisible():
             self._set_help_text()
             self._hide_buttons()
+            
+            frame = self._wizard.rviz_frames[1]
 
-            self.gridLayout_2.addWidget(self._wizard.rviz_frame_1, 0, 1)
-            self._wizard.rviz_frame_1.setVisible(True)
-            self._wizard.rviz_frame_1.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
-            self._set_rviz_view(self._wizard.rviz_frame_1, 'Front View')
-            self._focus_rviz_view_on_links(self._wizard.rviz_frame_1, '', 'pelvis')
-            self._hide_all_joint_axes(self._wizard.rviz_frame_1)
+            self.gridLayout_2.addWidget(frame, 1, 1)
+            frame.setVisible(True)
+            frame.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
+            self._set_rviz_view(frame, 'Front View')
+            self._focus_rviz_view_on_links(frame, '', 'pelvis')
+            self._hide_all_joint_axes(frame)
             
             if self._wizard.path_name != '':
                 self._set_alpha(self._wizard.paths[self._wizard.path_name]['show'])
             else:
-                self._set_alpha(self._wizard.paths[self._get_current_button_text()]['show'])
+                self._set_alpha(self._wizard.paths[self.paths_list.currentItem().text()]['show'])
                 
             self._wizard.show_turning_dir_pub.publish(False)
             
-    def _get_current_button_text(self):
-        
-        for button in self._radioButtons:
-            if button.isChecked():
-                return button.text()
-                
+    def get_chosen_path(self):
+        return self.paths_list.currentItem().text()
+            

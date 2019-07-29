@@ -12,7 +12,6 @@ from python_qt_binding.QtCore import QObject
 from python_qt_binding.QtGui import QValidator, QDoubleValidator, QIntValidator
 from python_qt_binding.QtWidgets import QWidget, QFrame, QLayout
 
-from thor_mang_calibration.msg import Joints
 from std_msgs.msg import String
 
 
@@ -25,25 +24,16 @@ class Page(QWidget):
         self._wizard = wizard
         
         # load wizard ui - header line and page change buttons
-        rp = rospkg.RosPack()
-        ui_file = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'ui', ui_name)
-        loadUi(ui_file, self, {'QWidget': QWidget})
+        if ui_name != '':
+            rp = rospkg.RosPack()
+            ui_file = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'ui', ui_name)
+            loadUi(ui_file, self, {'QWidget': QWidget})
         
         self._wizard.pages.currentChanged[int].connect(self._update)
         
             
 #________ common functions ________________________________________________________________________
 
-    def _add_pages_to_list(self):
-        self._wizard.page_list.setMaxVisibleItems(5)       
-        self._wizard.page_list.setStyleSheet("QComboBox { combobox-popup: 0; }")
-
-        path = self._wizard.path
-        
-        for page in path:
-            self._wizard.page_list.addItem(self._joint_designation_to_name(str(page)))
-
-            
     def _update_pages_list(self):
         path = self._wizard.path
         current = 0
@@ -56,8 +46,27 @@ class Page(QWidget):
             
         return -1
         
+    def _sort_joints_by_group(self):
+        groups = {}
+        for g in self._wizard.page_config['groups']:
+            groups[g] = []
         
-    def _position_from_key(self, key):
+        
+        for key in self._wizard.page_config.keys():
+            if key == 'Walking Calibration':
+                continue
+            entry = self._wizard.page_config[key]
+            if type(entry) == dict and 'num_joints' in entry.keys():
+                for i in range(1, self._wizard.page_config[key]['num_joints'] + 1):
+                    joint_name = self._wizard.page_config[key][i]['name']
+                    for group_name in self._wizard.page_config['groups']:
+                        if str(joint_name).lower().find(str(group_name)) != -1:
+                            groups[group_name] = groups[group_name] + [joint_name]
+                            break
+        
+        return groups
+        
+    def _position_from_joint_name(self, key):
             
         left = False
         right = False
@@ -68,11 +77,12 @@ class Page(QWidget):
             arm = True
         elif str(key).lower().find('leg') != -1: 
             leg = True
-            
-        if str(key).lower().find('r_') != -1: 
-            right = True
-        elif str(key).lower().find('l_') != -1: 
+         
+        if str(key).lower().find('l_') == 0: 
             left = True
+        elif str(key).lower().find('r_') == 0: 
+            right = True
+        
         
         return arm, leg, left, right
         
@@ -80,8 +90,7 @@ class Page(QWidget):
         line = QFrame()
         line.setFrameShape(frame_shape)
         line.setFrameShadow(QFrame.Sunken)
-        line.setLineWidth(1)
-
+                
         return line
 
     def _publish_visualized_joint(self, joint):
@@ -140,6 +149,10 @@ class Page(QWidget):
     def _rviz_view_set_distance(self, rviz_frame, distance):
         visualization_manager = rviz_frame.getManager()
         visualization_manager.getViewManager().getCurrent().subProp('Distance').setValue(distance)
+    
+    def _rviz_set_update_interval(self, rviz_frame, tf_prefix):
+        robot_model = self._get_robot_state_display(rviz_frame)
+        robot_model.subProp('Update Interval').setValue(tf_prefix)
         
     def _rviz_view_show_joints_axes(self, rviz_frame, joint, value):
         robot_model = self._get_robot_state_display(rviz_frame)
@@ -183,25 +196,4 @@ class Page(QWidget):
             value = int(text)
         
         return valid, value
-        
-
-    def _joint_designation_to_name(self, text):
-        if text.lower().find('l_') != -1:
-            text = text.replace('L_', 'Left ')
-            text = text.replace('l_', 'Left ')
-        elif text.lower().find('r_') != -1:
-            text = text.replace('R_', 'Right ')
-            text = text.replace('r_', 'Right ')
-
-        if text.lower().find('leg_') != -1:
-            text = text.replace('Leg_', '')
-            text = text.replace('leg_', '')
-        elif text.lower().find('arm_') != -1:
-            text = text.replace('arm_', '')
-            text = text.replace('Arm_', '')
-        
-        text = text.replace('_', ' ')
-        
-        return text
-        
     

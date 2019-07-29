@@ -11,9 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
     rospy 
     rqt_gui
     rqt_gui_py
-    std_msgs
-    message_generation)
-
+    std_msgs)
+    
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -47,10 +46,10 @@ catkin_python_setup()
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
- add_message_files(
-   FILES
-   Joints.msg
-)
+# add_message_files(
+#   FILES
+#   Joints.msg
+#)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -67,10 +66,10 @@ catkin_python_setup()
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-)
+#generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+#)
 
 catkin_package()
 
@@ -86,7 +85,7 @@ catkin_package()
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES
-  CATKIN_DEPENDS rospy rqt_gui rqt_gui_py message_runtime
+  CATKIN_DEPENDS rospy rqt_gui rqt_gui_py
 #  DEPENDS system_widgets
 )
 

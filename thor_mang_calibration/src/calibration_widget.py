@@ -2,9 +2,13 @@
 
 import os
 
+import signal
+
 import rospy
 import rospkg
+import rosnode
 import actionlib
+import xml.dom.minidom
 
 import copy
 import math
@@ -29,19 +33,26 @@ from std_msgs.msg import String, Bool, Int64
 from sensor_msgs.msg import JointState
 
 from intro_page import IntroPage
-#from thor_mang_calibration.msg import Joints
+from pose_page import PosePage
+from calibration_page import CalibrationPage
+from walking_page import WalkingCalibrationPage
+from summary_page import SummaryPage
 
 class CalibrationDialog(Plugin):
     def __init__(self, context):
         super(CalibrationDialog, self).__init__(context)
         self.setObjectName('CalibrationDialog')
 
-        self._parent = QWidget()
+        #self._parent = QWidget()
         self._wizard = CalibrationWizard(context)
+        
+        signal.signal(signal.SIGINT, self.signal_handler)
         
     def shutdown_plugin(self):
         self._wizard.shutdown_plugin()
 
+    def signal_handler(self, sig, frame):
+        self.deleteLater()
 
         
 #__________________________________________________________________________________________________________________
@@ -68,13 +79,9 @@ class CalibrationWizard(QWidget):
             self._setup_wizard_variables()
             
             # rviz frames used on multiple pages
-            self.rviz_frame_1 = self._create_rviz_frame()
-            self.rviz_frame_2 = self._create_rviz_frame()
-            self.rviz_frame_3 = self._create_rviz_frame()
-            
-            self.rviz_frames = {1: self.rviz_frame_1, 2: self.rviz_frame_2, 3: self.rviz_frame_3}
-            
-            self.pages.insertWidget(0, IntroPage('Intro', 'intro_page.ui', self))#enum.value - 1, IntroPage(enum, 'intro_page.ui', self))
+            self.rviz_frames = {1: self._create_rviz_frame()}
+                        
+            self.pages.insertWidget(0, IntroPage('Intro', 'intro_page.ui', self))
             self.pages.setCurrentIndex(0)
 
             # set window title
@@ -86,7 +93,14 @@ class CalibrationWizard(QWidget):
 
             self._create_publishers_and_clients()
             
-            ns = rospy.get_namespace()
+            ns = rospy.get_namespace()            
+            calibration_publishers = rospy.get_published_topics(ns + 'calibration')
+            print('waiting for calibration/joint_state_publisher...')
+            
+            while not [str(ns + 'calibration/joint_states'), 'sensor_msgs/JointState'] in calibration_publishers:
+                calibration_publishers = rospy.get_published_topics(ns + 'calibration')
+                rospy.sleep(0.1)
+            
             self.sub = rospy.Subscriber(ns + 'joint_offsets/parameter_descriptions', ConfigDescription, self._parse_offset_config)
             
             msg = JointState()
@@ -98,6 +112,7 @@ class CalibrationWizard(QWidget):
             self.preview_pose_pub.publish(msg)
             
             self.torque_off_radio_button.setChecked(True)
+            
         else:
             print "Parameter Server not running. Shutting down."
             self.shutdown_plugin()
@@ -106,23 +121,131 @@ class CalibrationWizard(QWidget):
         
     def shutdown_plugin(self):
         print "Shutting down ..."
+        
         if rospy.has_param('joint_offsets'):
+        
+            self.sub.unregister()
+            
+            ns = rospy.get_namespace() 
+            nodes = rosnode.get_node_names(ns + 'calibration')           
+            killed = rosnode.kill_nodes(nodes)
+            
             self.configuration_client.close()
-            self.walking_command_pub.unregister()
+            
             self.module_control_pub.unregister()
+            self.walking_command_pub.unregister()
+            
             self.sync_write_pub.unregister()
-            #self.pose_pub.unregister()
+            
+            self.preview_pose_pub.unregister()
+            self.show_turning_dir_pub.unregister()    
+            self.turning_joint_pub.unregister()
+            
             self.ini_pose_pub.unregister()
+            
             self.allow_all_mode_transitions_pub.unregister()
-            #self.set_control_mode_client.close()
+            self.control_mode_status.unregister()
             for controller in self.trajectory_controllers:
                 controller.unregister()
-            self.control_mode_status.unregister()
+                
+            #nodes = rosnode.get_node_names(ns + 'thormang3_foot_step_generator')
+            #if nodes != []:
+            #    print('shutting down foot step generator')
+            #    killed = rosnode.kill_nodes(nodes)
+                
         print "Done!"
 
 
 # __________________________ functions for initial setup ______________________________________________________________
 
+    def _parse_offset_config(self, data):
+        self._parse_config_to_dict(data.min, self.offset_mins)
+        self._parse_config_to_dict(data.max, self.offset_maxs)
+
+
+    def _parse_config_to_dict(self, conf, dictionary):
+        for limits in [conf.bools, conf.ints, conf.strs, conf.doubles]:
+            for i in range(0, len(limits)):
+                name = limits[i].name
+                dictionary[name] = limits[i].value
+
+    def _get_joints_information_from_robot(self):
+        robot_description = rospy.get_param('robot_description')
+        robot = xml.dom.minidom.parseString(robot_description).getElementsByTagName('robot')[0]
+        joint_limits = {}
+        
+        for child in robot.childNodes:
+            if child.localName == 'joint':
+                if not child.getAttribute('type') in ['fixed', 'floating', 'planar']:
+                    name = child.getAttribute('name')
+                    if name in self.pose.keys():
+                        limit = child.getElementsByTagName('limit')[0]
+
+                        if child.getAttribute('type') == 'continuous':
+                            joint_limits[name] = {'min': -math.pi, 'max': math.pi}
+                        else:
+                            joint_limits[name] = {'min': float(limit.getAttribute('lower')), 'max': float(limit.getAttribute('upper'))}
+                
+        return joint_limits
+    
+    def _init_pose(self):
+        rp = rospkg.RosPack()
+        poses_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', 'calibration_poses.yaml')  
+        f = open(poses_path, 'r')
+        poses = load(f)
+        f.close()
+        pose = poses[poses.keys()[0]]
+
+        return pose
+        
+    def _load_from_config(self, file_name):
+        rp = rospkg.RosPack()
+        file_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', file_name)  
+        f = open(file_path, 'r')
+        file_content = load(f)
+        f.close()
+
+        return file_content
+        
+    def _setup_wizard_variables(self):     
+        self.save = False
+        self.no_save = True
+        self.reset = False
+        
+        rp = rospkg.RosPack()
+        offset_path = os.path.join(rp.get_path('thormang3_manager'), 'config', 'offset.yaml')
+        f = open(offset_path, 'r')
+        self.stored_offsets = (load(f))["offset"]
+        f.close()
+        
+        self.pose = self._init_pose()
+        self.joint_limits = self._get_joints_information_from_robot()
+        self.page_config = self._load_from_config('page_config.yaml')
+        
+        self.max_joints = -1
+        
+        self.paths = self._load_from_config('paths.yaml')
+        self.path_name = ''
+        self.path = []          
+        
+        self.torque_on = False
+        
+        self.current_control_mode = ''
+        
+        self.offset_mins = {}
+        self.offset_maxs = {}
+        
+        
+    def _connect_ui_signals(self):
+        self.next_button.clicked[bool].connect(self._handle_next_button)
+        self.back_button.clicked[bool].connect(self._handle_back_button)
+        self.finish_button.clicked[bool].connect(self._handle_finish_button)
+        self.page_list.activated[int].connect(self._handle_page_list_entry_clicked)
+        self.torque_on_radio_button.toggled[bool].connect(self._handle_torque_button)
+        self.torque_off_radio_button.toggled[bool].connect(self._handle_torque_button)
+        self.take_position.clicked[bool].connect(self._handle_take_position_button)
+        self.enable_all_rviz_check.clicked.connect(self._handle_all_rviz_check)
+            
     def _create_publishers_and_clients(self):
         
         self.configuration_client = dynamic_reconfigure.client.Client('joint_offsets')
@@ -152,67 +275,6 @@ class CalibrationWizard(QWidget):
         for name in self.trajectory_controller_names:
             self.trajectory_controllers.append(rospy.Publisher(ns + 'joints/' + name + '/command', JointTrajectory, queue_size=10))
             self.trajectory_controller_joints.append(rospy.get_param(ns + 'joints/' + name + '/joints'))
-
-    def _parse_offset_config(self, data):
-        self._parse_config_to_dict(data.min, self.offset_mins)
-        self._parse_config_to_dict(data.max, self.offset_maxs)
-
-
-    def _parse_config_to_dict(self, conf, dictionary):
-        for limits in [conf.bools, conf.ints, conf.strs, conf.doubles]:
-            for i in range(0, len(limits)):
-                name = limits[i].name
-                dictionary[name] = limits[i].value
-
-    
-    def _init_pose(self):
-        rp = rospkg.RosPack()
-        poses_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', 'calibration_poses.yaml')  
-        f = open(poses_path, 'r')
-        poses = load(f)
-        f.close()
-        pose = poses[poses.keys()[0]]
-
-        return pose
-        
-    def _load_from_config(self, file_name):
-        rp = rospkg.RosPack()
-        file_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', file_name)  
-        f = open(file_path, 'r')
-        file_content = load(f)
-        f.close()
-
-        return file_content
-        
-    def _setup_wizard_variables(self):     
-        self.save = True
-        self.no_save = False
-        self.reset = False
-        
-        self.pose = self._init_pose()
-        self.page_config = self._load_from_config('page_config.yaml')
-        
-        self.paths = self._load_from_config('paths.yaml')
-        self.path_name = ''
-        self.path = []          
-        
-        self.torque_on = False
-        
-        self.current_control_mode = ''
-        
-        self.offset_mins = {}
-        self.offset_maxs = {}
-        
-        
-    def _connect_ui_signals(self):
-        self.next_button.clicked[bool].connect(self._handle_next_button)
-        self.back_button.clicked[bool].connect(self._handle_back_button)
-        self.finish_button.clicked[bool].connect(self._handle_finish_button)
-        self.page_list.activated[int].connect(self._handle_page_list_entry_clicked)
-        self.torque_on_radio_button.toggled[bool].connect(self._handle_torque_button)
-        self.torque_off_radio_button.toggled[bool].connect(self._handle_torque_button)
-        self.take_position.clicked[bool].connect(self._handle_take_position_button)
-        self.enable_all_rviz_check.clicked.connect(self._handle_all_rviz_check)
         
 
 # __________________________ other functions __________________________________________________________________________
@@ -221,6 +283,10 @@ class CalibrationWizard(QWidget):
     def _log_status(self, data):
         self.current_control_mode = data.current_control_mode
 
+    def setup_rviz_frames(self, max_joints):
+        for i in range(1, max_joints + 1):
+            if not i in self.rviz_frames.keys():
+                self.rviz_frames[i] = self._create_rviz_frame()
     
     def _create_rviz_frame(self):
         rviz_frame = rviz.VisualizationFrame()
@@ -236,6 +302,71 @@ class CalibrationWizard(QWidget):
         rviz_frame.setHideButtonVisibility(False)
         
         return rviz_frame
+        
+    def _setup_pages(self):
+        path_picked = self.pages.currentWidget().get_chosen_path()
+             
+        if path_picked != self.path_name:
+            print('Adding pages to wizard...')
+            pages = self.pages
+        
+            self._clear_pages()
+            self._add_pages_to_wizard(path_picked)
+            
+            self.page_list.clear()
+            self._add_pages_to_list()
+            
+            self.path_name = path_picked
+            
+            print('Done!')
+        
+    def _clear_pages(self):
+        pages = self.pages
+        
+        if pages.count() > 1:
+            for i in reversed(range(2, pages.count() + 1)):
+                pages.removeWidget(pages.widget(i))
+    
+    
+    def _add_pages_to_wizard(self, path):
+        pages = self.pages
+        path = self.paths[path]['path']
+        self.path = ['Intro'] + path + ['Summary']
+        
+        i = 1
+            
+        for page in path:
+            if str(page).find('Pose') != -1:
+                pages.insertWidget(i, PosePage(str(page), 'pose_page.ui', self))
+            elif str(page).find('Walking Calibration') != -1:
+                pages.insertWidget(i, WalkingCalibrationPage(str(page), 'calibration_page.ui', self))
+            else:
+                pages.insertWidget(i, CalibrationPage(str(page), 'calibration_page.ui', self))   
+            i += 1
+                
+        pages.insertWidget(i, SummaryPage('Summary', 'summary_page.ui', self))
+
+    def _add_pages_to_list(self):
+        self.page_list.setMaxVisibleItems(5)       
+        self.page_list.setStyleSheet("QComboBox { combobox-popup: 0; }")
+
+        for page in self.path:
+            self.page_list.addItem((str(page)))
+
+    def _get_max_joints(self):
+        config = self.page_config
+        path = self.path
+        
+        max_joints = -1
+        
+        for key in path:
+            page = config[key]
+            if 'num_joints' in page.keys():
+                num_joints = page['num_joints']
+                if num_joints > max_joints:
+                    max_joints = num_joints
+                    
+        return max_joints
 
 # __________________________ ui functions _____________________________________________________________________________
     
@@ -245,9 +376,10 @@ class CalibrationWizard(QWidget):
         self.enable_all_rviz_check.setChecked(False)
         
         if self.pages.currentIndex() == 0:
-            print('Adding pages to wizard...')
-            self.pages.currentWidget()._setup_pages()
-            print('Done!')
+            self._setup_pages()
+
+            self.max_joints = self._get_max_joints()
+            self.setup_rviz_frames(self.max_joints)
             
         self.pages.setCurrentIndex(self._nextId())
 
@@ -292,7 +424,7 @@ class CalibrationWizard(QWidget):
         
     def _handle_take_position_button(self):
         if self.torque_on == True:
-            if self.pages.currentWidget()._id != 'Walking_Calibration':
+            if self.pages.currentWidget()._id != 'Walking Calibration':
                 mode = String()
                 mode.data = "ros_control_module"
                 self.module_control_pub.publish(mode)
@@ -346,7 +478,7 @@ class CalibrationWizard(QWidget):
     def _close_and_restart_configuration_client(self):
         if self.save:
             self.configuration_client.update_configuration({'save_config':True})
-        elif self.reset == True:
+        elif self.reset:
             rp = rospkg.RosPack()
             offset_path = os.path.join(rp.get_path('thormang3_manager'), 'config', 'offset.yaml')
             f = open(offset_path, 'r')
