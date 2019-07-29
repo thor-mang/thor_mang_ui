@@ -17,7 +17,7 @@ Pose:
     page_help_text: >-
         Please pick a pose for the calibration.<br/>You may define your own pose under Custom.
     
-Walking_Calibration:
+Walking Calibration:
     num_joints: 2
     page_help_text: >-
         Adjust the roll angles of both ankles for a better walking performance.<br/>
@@ -41,7 +41,7 @@ Summary:
         Go over the current calibration and check that everything is correct.<br/>
         Your calibration can be saved, reseted, or kept for now but discarded later (no save).
 
-L_Leg_Hip: 
+Left Hip: 
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -65,7 +65,7 @@ L_Leg_Hip:
         pic: 'hip_pitch.png'
         rviz view: 'Close Left Side View'
         
-R_Leg_Hip:
+Right Hip:
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -88,12 +88,12 @@ R_Leg_Hip:
         pic: 'hip_pitch.png'
         rviz view: 'Close Right Side View'
         
-L_Leg_Knee: 
+Knees: 
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
         The rviz window shows the positive turning direction.
-    num_joints: 1
+    num_joints: 2
     1:
         name: l_leg_kn_p
         previous: l_leg_hip_p
@@ -101,20 +101,14 @@ L_Leg_Knee:
         pic: 'knee_pitch.png'
         rviz view: 'Close Left Side View'
 
-R_Leg_Knee:
-    page_help_text: >-
-        Go over the joints from left to right. <br/> 
-        Align the indicated joints by pressing + or -. <br/>
-        The rviz window shows the positive turning direction.
-    num_joints: 1
-    1:
+    2:
         name: r_leg_kn_p
         previous: r_leg_hip_p
         rotation: pitch
         pic: 'knee_pitch.png'
         rviz view: 'Close Right Side View'
 
-L_Leg_Ankle: 
+Left Ankle: 
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -132,7 +126,7 @@ L_Leg_Ankle:
         pic: 'ankle_roll.png'
         rviz view: 'Close Front View'
 
-R_Leg_Ankle: 
+Right Ankle: 
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -181,7 +175,7 @@ Head:
         pic: 'head_pitch.png'
         rviz view: 'Close Left Side View'
 
-L_Arm_Shoulder:
+Left Shoulder:
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -204,7 +198,7 @@ L_Arm_Shoulder:
         pic: 'shoulder_pitch2.png'
         rviz view: 'Close Top View'
 
-L_Arm_Elbow:
+Left Elbow:
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -217,7 +211,7 @@ L_Arm_Elbow:
         pic: 'elbow_yaw.png'
         rviz view: 'Close Top View'
 
-L_Arm_Wrist:
+Left Wrist:
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -240,7 +234,7 @@ L_Arm_Wrist:
         pic: 'wrist_pitch.png'
         rviz view: 'Close Top View'
 
-R_Arm_Shoulder:
+Right Shoulder:
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -263,7 +257,7 @@ R_Arm_Shoulder:
         pic: 'shoulder_pitch2.png'
         rviz view: 'Close Top View'
 
-R_Arm_Elbow:
+Right Elbow:
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -276,7 +270,7 @@ R_Arm_Elbow:
         pic: 'elbow_yaw.png'
         rviz view: 'Close Top View'
 
-R_Arm_Wrist:
+Right Wrist:
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -300,4 +294,5 @@ R_Arm_Wrist:
         rviz view: 'Close Top View'
         
         
-order: [shoulder, elbow, wrist, hip, knee, ankle, head, torso]
+groups: ['l_arm_sh', 'r_arm_sh', 'l_arm_el', 'r_arm_el', 'l_arm_wr', 'r_arm_wr', 'l_leg_hip',
+        'r_leg_hip', 'l_leg_kn', 'r_leg_kn', 'l_leg_an', 'r_leg_an', 'head', 'torso']

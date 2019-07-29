@@ -43,16 +43,16 @@ class WalkingCalibrationPage(CalibrationPage):
     def __init__(self, id, ui_name, wizard = None):
         super(WalkingCalibrationPage, self).__init__(id, ui_name, wizard)
         
-        line = self._make_line(QFrame.VLine)
-        self.page_layout.addWidget(line, 0, 3)
-        
         rp = rospkg.RosPack()
         ui_file = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'ui', 'walking_panel.ui')
         self.walking_panel = QWidget()
         loadUi(ui_file, self.walking_panel, {'QWidget': QWidget})
         self.walking_panel.setDisabled(True)
         
-        self.page_layout.addWidget(self.walking_panel, 0, 4)
+        self.page_layout.addWidget(self.walking_panel, 0, 2)
+        
+        #line = self._make_line(QFrame.VLine)
+        #self.page_layout.addWidget(line, 0, 3)
         
         self._set_initial_values()
 
@@ -93,25 +93,51 @@ class WalkingCalibrationPage(CalibrationPage):
                 
             joints = []
             for i in range(1, self._noBoxes + 1):
-                if self._boxes[i]['enable_frame'].isChecked():
+                self._boxes_parts[i]['frame'] = self._wizard.rviz_frames[i]
+                self._boxes_parts[i]['display'].layout().addWidget(self._boxes_parts[i]['frame'])
+                self._hide_all_joint_axes(self._boxes_parts[i]['frame'])
+                if self._boxes_parts[i]['enable_frame'].isChecked():
                     self._handle_rviz_check(i)
-                joints.append(self._boxes[i]['joint'])
                 
         else:
-            self._boxes[1]['frame'] = None
-            self._boxes[2]['frame'] = None
+            self._boxes_parts[1]['frame'] = None
+            self._boxes_parts[2]['frame'] = None
             
 
     def _hide_buttons(self):
         self._wizard.finish_button.setVisible(False)
+        
+    def _set_size_of_widgets(self):
+        width = self.parent().width()
+        height = self.parent().height()
+        
+        max_boxes = self._wizard.max_joints
+        
+        line_width = 0
+        
+        if self._lines != {}:
+            line_width = self._lines[1].width()
+        
+        left, top, right, bottom = self.page_layout.getContentsMargins()
+        spacing = self.page_layout.spacing()
+
+        box_width = int((width - spacing * (max_boxes) - left - right)/max_boxes)
+
+        width_left = width - left - right
+
+        for i in range(1, self._noBoxes + 1):
+            self._box_widgets[i].setFixedSize(box_width, height - top - bottom)
+            width_left -= (box_width + spacing)
+            #if i < self._noBoxes and self._lines != {}:
+            #    width_left -= (line_width + spacing)
+
+        self.spacer.changeSize(width_left + spacing, 20)
 
 
 #_______ button functions _________________________________________________________________________   
 
     def _handle_take_initial_position(self):
-        print('walking page handle take initial position')
         if self._wizard.torque_on:
-            print('publishing ini_pose')
             self._wizard.ini_pose_pub.publish("ini_pose")
             self._ini_pose_taken = True
             
