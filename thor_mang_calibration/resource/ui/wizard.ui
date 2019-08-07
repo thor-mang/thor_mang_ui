@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1037</width>
-    <height>562</height>
+    <width>1061</width>
+    <height>603</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -210,10 +210,10 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_18">
            <property name="topMargin">
-            <number>0</number>
+            <number>2</number>
            </property>
            <property name="bottomMargin">
-            <number>0</number>
+            <number>2</number>
            </property>
            <item row="0" column="1">
             <widget class="QRadioButton" name="torque_on_radio_button">
@@ -339,13 +339,13 @@
             <number>0</number>
            </property>
            <property name="topMargin">
-            <number>0</number>
+            <number>2</number>
            </property>
            <property name="rightMargin">
             <number>6</number>
            </property>
            <property name="bottomMargin">
-            <number>0</number>
+            <number>2</number>
            </property>
            <item>
             <widget class="QLabel" name="walking_module_label">

@@ -51,7 +51,6 @@ class PosePage(Page):
             result = edit.editingFinished.connect(self._handle_edits, 0x80)
             
         # have a button selected by default
-        #self._radioButtons[0].setChecked(True)
         self.pose_list.setCurrentRow(0)
         
                     
@@ -72,7 +71,7 @@ class PosePage(Page):
             self._set_rviz_view(frame, 'Front View')
             self._hide_all_joint_axes(frame)
             
-            self._wizard.show_turning_dir_pub.publish(False)
+            self._wizard.publish_turning_direction(False)
 
 
 #_________ changes to ui __________________________________________________________________________
@@ -168,8 +167,6 @@ class PosePage(Page):
         self.customTab.widget(2).layout().addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 6)
     
     def _add_poses_to_list(self):
-        self.poses['Custom'] = copy.deepcopy(self.poses[self.poses.keys()[0]])
-                
         for key in sorted(self.poses.keys()):
             self.pose_list.addItem(str(key))
         
@@ -190,18 +187,17 @@ class PosePage(Page):
 
     def _handle_reload_file_button(self):
         current_selection = self.pose_list.currentItem().text()
-        
         self.poses = self._load_calibration_poses()
         
         self.pose_list.clear()
         self._add_poses_to_list()
-        
+
         something_selected = False
         for i in range(self.pose_list.count()):
             if self.pose_list.item(i).text() == current_selection:
                 self.pose_list.setCurrentRow(i)
                 something_selected = True
-        
+
         if not something_selected:
             self.pose_list.setCurrentRow(0)
 
@@ -220,7 +216,7 @@ class PosePage(Page):
             self._lineEdits[key].setText(str(self.poses[current_selection][key]))
             
         self._wizard.pose = copy.deepcopy(self.poses[current_selection])
-        self._send_preview_pose_to_joint_state_publisher()
+        self._wizard.publish_preview_pose()
 
     # for functionality of a custom pose setting       
     def _handle_edits(self):
@@ -249,32 +245,7 @@ class PosePage(Page):
                 edit.setText(str(value))
                 
         self._wizard.pose = copy.deepcopy(self.poses['Custom'])
-        self._send_preview_pose_to_joint_state_publisher()
-        
-# ____________________ message function _______________________________________________________________________________
-
-    def _send_preview_pose_to_joint_state_publisher(self):
-        msg = self._generate_joint_state_message()
-        self._wizard.preview_pose_pub.publish(msg)
-
-    def _generate_joint_state_message(self):
-        limits = self._wizard.joint_limits
-        msg = JointState()
-        
-        for joint in self._wizard.pose:
-            upper_limit = limits[joint]['max']
-            lower_limit = limits[joint]['min']      
-            
-            value = math.radians(self._wizard.pose[joint])
-            if value > upper_limit:
-                value = upper_limit
-            elif value < lower_limit:
-                value = lower_limit
-                
-            msg.position.append(value)
-            msg.name.append(joint) 
-            
-        return msg
+        self._wizard.publish_preview_pose()
         
 # ____________________ helper functions ________________________________________________________________________________
 
@@ -291,5 +262,7 @@ class PosePage(Page):
         f = open(poses_path, 'r')
         poses = load(f)
         f.close()
+        
+        poses['Custom'] = copy.deepcopy(poses[poses.keys()[0]])
         
         return poses

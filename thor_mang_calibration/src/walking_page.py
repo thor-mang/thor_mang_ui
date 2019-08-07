@@ -36,10 +36,6 @@ class WalkingCalibrationPage(CalibrationPage):
     _step_angle = 0.0
     _step_time = 1.0
 
-    _walking_module_on = False
-    _ini_pose_taken = False
-
-
     def __init__(self, id, ui_name, wizard = None):
         super(WalkingCalibrationPage, self).__init__(id, ui_name, wizard)
         
@@ -50,9 +46,6 @@ class WalkingCalibrationPage(CalibrationPage):
         self.walking_panel.setDisabled(True)
         
         self.page_layout.addWidget(self.walking_panel, 0, 2)
-        
-        #line = self._make_line(QFrame.VLine)
-        #self.page_layout.addWidget(line, 0, 3)
         
         self._set_initial_values()
 
@@ -71,8 +64,8 @@ class WalkingCalibrationPage(CalibrationPage):
         self.walking_panel.turn_left_button.clicked[bool].connect(self._take_steps)
         self.walking_panel.turn_right_button.clicked[bool].connect(self._take_steps)
         
-        self._wizard.walking_module_enable_radio_button.toggled[bool].connect(lambda: self._handle_walking_module_button(True))
-        self._wizard.walking_module_disable_radio_button.toggled[bool].connect(lambda: self._handle_walking_module_button(False))
+        self._wizard.walking_module_enable_radio_button.toggled[bool].connect(lambda: self._wizard._handle_walking_module_button(True))
+        self._wizard.walking_module_disable_radio_button.toggled[bool].connect(lambda: self._wizard._handle_walking_module_button(False))
         
         self._wizard.walking_module_disable_radio_button.setChecked(True)
         
@@ -90,6 +83,8 @@ class WalkingCalibrationPage(CalibrationPage):
             self._set_help_text()
             self._hide_buttons()
             self._update_pages_list()
+             
+            self._set_size_of_widgets()   
                 
             joints = []
             for i in range(1, self._noBoxes + 1):
@@ -127,56 +122,29 @@ class WalkingCalibrationPage(CalibrationPage):
 
         for i in range(1, self._noBoxes + 1):
             self._box_widgets[i].setFixedSize(box_width, height - top - bottom)
+            
+            display = self._boxes_parts[i]['display']
+            pixmap = self._boxes_parts[i]['pixmap']
+
+            pixmap = self._resize_with_aspect_ratio(pixmap, display.width(), display.height())
+            
+            self._boxes_parts[i]['display'].layout().widget(0).setFixedSize(pixmap.width(), pixmap.height())
+            self._boxes_parts[i]['display'].layout().widget(0).setPixmap(pixmap)
+            
             width_left -= (box_width + spacing)
-            #if i < self._noBoxes and self._lines != {}:
-            #    width_left -= (line_width + spacing)
 
         self.spacer.changeSize(width_left + spacing, 20)
 
 
 #_______ button functions _________________________________________________________________________   
 
-    def _handle_take_initial_position(self):
-        if self._wizard.torque_on:
-            self._wizard.ini_pose_pub.publish("ini_pose")
-            self._ini_pose_taken = True
-            
-            self._wizard.walking_module_group.setEnabled(True)
-        else:
-            print('Turn torque on before moving the robot into position.')
-
-
-    def _handle_walking_module_button(self, enable):
-        if enable == True and self._walking_module_on == False:
-            if self._ini_pose_taken:
-                mode = String()
-                mode.data = "walking_module"
-                self._wizard.module_control_pub.publish(mode)
-                self._walking_module_on = True
-                
-                self.walking_panel.setEnabled(True)
-            else:
-                print('Go to inital position before enabling the walking module.')
-                self._wizard.walking_module_disable_radio_button.setChecked(True)
-        if enable == False and self._walking_module_on == True:
-            mode = String()
-            mode.data = "none"
-            self._wizard.module_control_pub.publish(mode)
-            self._walking_module_on = False  
-            
-            self.walking_panel.setDisabled(True) 
-        
-        
     def _take_steps(self):
-        if self._walking_module_on:
+        if self._wizard.walking_module_on:
             msg = FootStepCommand()
-            msg.command = self.sender().text().lower()
-            msg.step_num = self._num_steps
-            msg.step_time = self._step_time
-            msg.step_length = self._step_length
-            msg.side_step_length = self._side_step_length
-            msg.step_angle_rad = self._step_angle
-            self._wizard.walking_command_pub.publish(msg)
+            command = self.sender().text().lower()
+            
+            self._wizard.publish_footstep_command(command, self._num_steps, self._step_time,
+                                    self._step_length, self._side_step_length, self._step_angle)
         else:
             print('Turn walking module on before attempting to take steps.')
             

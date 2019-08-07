@@ -81,7 +81,7 @@ class IntroPage(Page):
             else:
                 self._set_alpha(self._wizard.paths[self.paths_list.currentItem().text()]['show'])
                 
-            self._wizard.show_turning_dir_pub.publish(False)
+            self._wizard.publish_turning_direction(False)
             
     def get_chosen_path(self):
         return self.paths_list.currentItem().text()

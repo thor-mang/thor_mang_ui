@@ -93,11 +93,6 @@ class Page(QWidget):
                 
         return line
 
-    def _publish_visualized_joint(self, joint):
-        msg = String()
-        msg = joint
-        self._wizard.turning_joint_pub.publish(msg)
-
     def _set_help_text(self):
         if 'page_help_text' in self._wizard.page_config[self._id]:
             self._wizard.page_help_text_label.setText(self._wizard.page_config[self._id]['page_help_text'])

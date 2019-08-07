@@ -16,6 +16,7 @@ import math
 import rviz
 
 import dynamic_reconfigure.client
+from dynamic_reconfigure.server import Server
 from dynamic_reconfigure.msg import ConfigDescription
 
 from rqt_gui_py.plugin import Plugin
@@ -68,7 +69,6 @@ class CalibrationWizard(QWidget):
         print('Initializing calibration wizard...')
 
         if rospy.has_param('joint_offsets'):
-            
             # load wizard ui - header line and page change buttons
             rp = rospkg.RosPack()
             ui_file = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'ui', 'wizard.ui')
@@ -78,12 +78,6 @@ class CalibrationWizard(QWidget):
             
             self._setup_wizard_variables()
             
-            # rviz frames used on multiple pages
-            self.rviz_frames = {1: self._create_rviz_frame()}
-                        
-            self.pages.insertWidget(0, IntroPage('Intro', 'intro_page.ui', self))
-            self.pages.setCurrentIndex(0)
-
             # set window title
             if context.serial_number() > 1:
                 self.setWindowTitle(self.windowTitle() + (' (%d)' % context.serial_number()))
@@ -101,6 +95,8 @@ class CalibrationWizard(QWidget):
                 calibration_publishers = rospy.get_published_topics(ns + 'calibration')
                 rospy.sleep(0.1)
             
+            self.offset_mins = {}
+            self.offset_maxs = {}
             self.sub = rospy.Subscriber(ns + 'joint_offsets/parameter_descriptions', ConfigDescription, self._parse_offset_config)
             
             msg = JointState()
@@ -111,10 +107,17 @@ class CalibrationWizard(QWidget):
             
             self.preview_pose_pub.publish(msg)
             
+            rospy.set_param('/use_sim_time', 'false')
+            # rviz frames used on multiple pages
+            self.rviz_frames = {1: self._create_rviz_frame()}
+                        
+            self.pages.insertWidget(0, IntroPage('Intro', 'intro_page.ui', self))
+            self.pages.setCurrentIndex(0)
+            
             self.torque_off_radio_button.setChecked(True)
             
         else:
-            print "Parameter Server not running. Shutting down."
+            print("Missing dynamic reconfigure server from thormang3_manager. Shutting down.")
             self.shutdown_plugin()
             
         print('Done!')
@@ -148,10 +151,10 @@ class CalibrationWizard(QWidget):
             for controller in self.trajectory_controllers:
                 controller.unregister()
                 
-            #nodes = rosnode.get_node_names(ns + 'thormang3_foot_step_generator')
-            #if nodes != []:
-            #    print('shutting down foot step generator')
-            #    killed = rosnode.kill_nodes(nodes)
+            nodes = rosnode.get_node_names(ns + 'thormang3_foot_step_generator')
+            if nodes != []:
+                print('shutting down foot step generator')
+                killed = rosnode.kill_nodes(nodes)
                 
         print "Done!"
 
@@ -170,7 +173,7 @@ class CalibrationWizard(QWidget):
                 dictionary[name] = limits[i].value
 
     def _get_joints_information_from_robot(self):
-        robot_description = rospy.get_param('robot_description')
+        robot_description = rospy.get_param('calibration/robot_description')
         robot = xml.dom.minidom.parseString(robot_description).getElementsByTagName('robot')[0]
         joint_limits = {}
         
@@ -230,10 +233,10 @@ class CalibrationWizard(QWidget):
         
         self.torque_on = False
         
-        self.current_control_mode = ''
+        self.walking_module_on = False
+        self.walking_ini_pose_taken = False
         
-        self.offset_mins = {}
-        self.offset_maxs = {}
+        self.current_control_mode = ''
         
         
     def _connect_ui_signals(self):
@@ -269,19 +272,12 @@ class CalibrationWizard(QWidget):
         self.trajectory_controller_joints = []
         
         self.allow_all_mode_transitions_pub = rospy.Publisher(ns + 'control_mode_switcher/allow_all_mode_transitions', Bool, queue_size=1)
-        self.control_mode_status = rospy.Subscriber(ns + "control_mode_switcher/status", ControlModeStatus, self._log_status)
+        self.control_mode_status = rospy.Subscriber(ns + "control_mode_switcher/status", ControlModeStatus, self._log_control_mode)
         self.set_control_mode_client = actionlib.SimpleActionClient(ns + "control_mode_switcher/change_control_mode", ChangeControlModeAction)
         
         for name in self.trajectory_controller_names:
             self.trajectory_controllers.append(rospy.Publisher(ns + 'joints/' + name + '/command', JointTrajectory, queue_size=10))
             self.trajectory_controller_joints.append(rospy.get_param(ns + 'joints/' + name + '/joints'))
-        
-
-# __________________________ other functions __________________________________________________________________________
-
-
-    def _log_status(self, data):
-        self.current_control_mode = data.current_control_mode
 
     def setup_rviz_frames(self, max_joints):
         for i in range(1, max_joints + 1):
@@ -418,28 +414,47 @@ class CalibrationWizard(QWidget):
             if self.sender() == self.torque_on_radio_button:
                 self.torque_on = True
                 self.take_position.setEnabled(True)
+                
+                if self.pages.currentWidget()._id != 'Walking Calibration':
+                    self.publish_control_mode("ros_control_module")
+
+                    if self._check_control_mode_is_whole_body() == False:
+                        self._set_control_mode_to_whole_body()
+                
             else:
                 self.torque_on = False
                 self.take_position.setDisabled(True)
-        
+                
     def _handle_take_position_button(self):
         if self.torque_on == True:
             if self.pages.currentWidget()._id != 'Walking Calibration':
-                mode = String()
-                mode.data = "ros_control_module"
-                self.module_control_pub.publish(mode)
-            
-                if self._check_control_mode_is_whole_body() == False:
-                    self._set_control_mode_to_whole_body() 
-            
                 msgs = self._create_controller_trajectories()
-                self._send_controller_trajectories(msgs)
-                
+                self.send_controller_trajectories(msgs)
             else:
-                self.pages.currentWidget()._handle_take_initial_position()
+                self.ini_pose_pub.publish("ini_pose")
+                self.walking_ini_pose_taken = True
+                
+                self.walking_module_group.setEnabled(True)
 
         else:
             print('Turn torque on before moving the robot into position.')
+            
+    def _handle_walking_module_button(self, enable):
+        if enable == True and self.walking_module_on == False:
+            if self.walking_ini_pose_taken:
+                self.publish_control_mode("walking_module")
+                self.walking_module_on = True
+                
+                self.pages.currentWidget().walking_panel.setEnabled(True)
+            else:
+                print('Go to inital position before enabling the walking module.')
+                self.walking_module_disable_radio_button.setChecked(True)
+                
+        elif enable == False and self.walking_module_on == True:
+            self.publish_control_mode("none")
+            self.walking_module_on = False  
+            
+            self.walking_panel.pages.currentWidget().setDisabled(True) 
                 
     def _handle_all_rviz_check(self):
         page = self.pages.currentWidget()
@@ -460,7 +475,6 @@ class CalibrationWizard(QWidget):
                 
         return -1
             
-            
     def _previousId(self):
         path = self.path
         previous = -1
@@ -473,7 +487,6 @@ class CalibrationWizard(QWidget):
             previous += 1
                             
         return -1
-                      
                       
     def _close_and_restart_configuration_client(self):
         if self.save:
@@ -492,62 +505,6 @@ class CalibrationWizard(QWidget):
         self.configuration_client = dynamic_reconfigure.client.Client('joint_offsets')
         self.configuration_client.update_configuration({'save_config':False})
                       
-            
-    def _create_torque_message(self):
-        msg = SyncWriteItem()
-        msg.item_name = "torque_enable"
-        msg.joint_name.extend(self.pose.keys())
-        msg.value = []
-
-        if self.sender() == self.torque_on_radio_button:
-            msg.value.extend([1] * len(self.pose.keys()))
-
-        if self.sender() == self.torque_off_radio_button:
-            msg.value.extend([0] * len(self.pose.keys()))
-            
-        return msg
-            
-
-    def _create_controller_trajectories(self):
-        pose = self.pose
-        joint_names = self.trajectory_controller_joints
-        
-        joint_trajectories = []
-
-        for names in joint_names:
-
-            target_point = JointTrajectoryPoint()
-            target_point.time_from_start = rospy.Duration(4, 0)
-
-            for name in names:
-                target_point.positions.append(math.radians(pose[name]))
-
-            trajectory = JointTrajectory()
-            trajectory.joint_names = names
-            trajectory.points = self._get_trajectory_from_target_point(target_point, 1)
-            joint_trajectories.append(trajectory)
-
-        return joint_trajectories
-    
-    def _get_trajectory_from_target_point(self, target_point, num_points_total):
-        points = []
-        
-        for i in range(1, num_points_total + 1):
-            point = copy.deepcopy(target_point)
-            point.positions[:] = [i * x / num_points_total for x in point.positions]
-            point.time_from_start = i * point.time_from_start / num_points_total
-            
-            points.append(point)
-            
-        return points
-    
-    def _send_controller_trajectories(self, joint_trajectories):
-        controllers = self.trajectory_controllers
-        for i in range(0, len(controllers)):
-            joint_trajectories[i].header.stamp = rospy.Time.now()
-            controllers[i].publish(joint_trajectories[i])
-
-
     def _show_all_ui_elements(self):
         self.header_widget.setVisible(True)
         self.torque_box.setVisible(True)
@@ -573,14 +530,29 @@ class CalibrationWizard(QWidget):
         for i in range(1, len(self.rviz_frames)):
             self.rviz_frames[i].getManager().getRootDisplayGroup().getDisplayAt(1).setValue(False)
     
-#________ control mode functions __________________________________________________________________
-
     def _check_control_mode_is_whole_body(self):
         if self.current_control_mode == 'whole_body':
             return True
         else:
             return False
             
+#_________ communication functions ________________________________________________________________
+    
+    def update_joint_configuration(self, joint, value):
+        self.configuration_client.update_configuration({joint: value})
+    
+    # ___ for control mode ____________
+    
+    def _log_control_mode(self, data):
+        self.current_control_mode = data.current_control_mode
+
+    def publish_control_mode(self, mode):
+        msg = String()
+        msg.data = mode
+        self.module_control_pub.publish(msg)
+
+    # ___ for trajectory controllers __
+
     def _set_control_mode_to_whole_body(self):
         if self.set_control_mode_client.wait_for_server(rospy.Duration(0.5)):
             self.allow_all_mode_transitions_pub.publish(True)
@@ -599,3 +571,111 @@ class CalibrationWizard(QWidget):
                 rospy.logwarn("Didn't receive any results after %.1f sec. Check communcation!" % action_timeout.to_sec())
         else:
             rospy.logerr("Can't connect to control mode action server!")
+
+    def send_controller_trajectories(self, joint_trajectories):
+        controllers = self.trajectory_controllers
+        for i in range(0, len(controllers)):
+            joint_trajectories[i].header.stamp = rospy.Time.now()
+            controllers[i].publish(joint_trajectories[i])
+
+    # ___ for preview pose ____________
+        
+    def publish_preview_pose(self):
+        msg = self._generate_preview_pose_msg(self.pose)
+        self.preview_pose_pub.publish(msg)
+        
+    def publish_visualized_joint(self, joint):
+        msg = String()
+        msg = joint
+        self.turning_joint_pub.publish(msg)
+        
+    def publish_turning_direction(self, on):          
+        self.show_turning_dir_pub.publish(on)
+        
+    # ___ for walking _________________
+    
+    def publish_footstep_command(self, command, num_steps, time, length, side_length, angle):
+        msg = self.generate_footstep_message(command, num_steps, time, length, side_length, angle)
+        self.walking_command_pub.publish(msg)
+        
+#_________ message generation functions ___________________________________________________________
+        
+    def _generate_preview_pose_msg(self, pose):
+        msg = JointState()
+        
+        for joint in pose:
+            upper_limit = self.joint_limits[joint]['max']
+            lower_limit = self.joint_limits[joint]['min']      
+            
+            value = math.radians(pose[joint])
+            if value > upper_limit:
+                value = upper_limit
+            elif value < lower_limit:
+                value = lower_limit
+                
+            msg.position.append(value)
+            msg.name.append(joint) 
+            
+        return msg
+        
+    def _create_torque_message(self):
+        msg = SyncWriteItem()
+        msg.item_name = "torque_enable"
+        msg.joint_name.extend(self.pose.keys())
+        msg.value = []
+
+        if self.sender() == self.torque_on_radio_button:
+            msg.value.extend([1] * len(self.pose.keys()))
+
+        if self.sender() == self.torque_off_radio_button:
+            msg.value.extend([0] * len(self.pose.keys()))
+            
+        return msg
+        
+    def _create_controller_trajectories(self):
+        pose = self.pose
+        joint_names = self.trajectory_controller_joints
+        
+        joint_trajectories = []
+
+        for names in joint_names:
+
+            target_point = JointTrajectoryPoint()
+            target_point.time_from_start = rospy.Duration(4, 0)
+
+            for name in names:
+                target_point.positions.append(math.radians(pose[name]))
+
+            trajectory = JointTrajectory()
+            trajectory.joint_names = names
+            trajectory.points = self._get_trajectory_from_target_point(target_point, 1)
+            joint_trajectories.append(trajectory)
+
+        return joint_trajectories
+        
+    def _get_trajectory_from_target_point(self, target_point, num_points_total):
+        points = []
+        
+        for i in range(1, num_points_total + 1):
+            point = copy.deepcopy(target_point)
+            point.positions[:] = [i * x / num_points_total for x in point.positions]
+            point.time_from_start = i * point.time_from_start / num_points_total
+            
+            points.append(point)
+            
+        return points
+        
+    def generate_footstep_message(self, command, num_steps, time, length, side_length, angle):        
+        msg = FootStepCommand()
+        
+        msg.command = command
+        msg.step_num = num_steps
+        msg.step_time = time
+        msg.step_length = length
+        msg.side_step_length = side_length
+        msg.step_angle_rad = angle
+        
+        return msg
+        
+
+

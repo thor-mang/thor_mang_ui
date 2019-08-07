@@ -88,10 +88,7 @@ class CalibrationPage(Page):
             self._boxes_parts[i] = self._find_box_parts(cal_box)#self._boxes_parts[i]
             if i > 1:
                 line = self._make_line(QFrame.VLine)
-                #self._lines[line_count] = line
-                #self.page_layout.addWidget(line, 0, item_count)
-                #line_count += 1
-                #item_count += 1
+ 
             self.page_layout.addWidget(cal_box, 0, item_count)
             item_count += 1
             
@@ -119,6 +116,7 @@ class CalibrationPage(Page):
             img = QLabel()
             img.setScaledContents(True)
             img.setPixmap(pix)
+            self._boxes_parts[i]['pixmap'] = pix
             
             # prepare image/rviz presentation
             layout = QStackedLayout()
@@ -127,8 +125,8 @@ class CalibrationPage(Page):
             
             # connect signals
             box['inc_ui'].editingFinished.connect(lambda state, x=i: self._handle_incSize(x))
-            box['inc_button'].clicked[bool].connect(lambda state, x=i: self._handle_button_inc(x))
-            box['dec_button'].clicked[bool].connect(lambda state, x=i: self._handle_button_dec(x))
+            box['inc_button'].clicked[bool].connect(lambda state, x=i, y=1: self._handle_inc_and_dec_button(x, y))
+            box['dec_button'].clicked[bool].connect(lambda state, x=i, y=-1: self._handle_inc_and_dec_button(x, y))
             box['enable_frame'].toggled.connect(lambda state, x=i: self._handle_rviz_check(x))
             box['show_axes'].toggled.connect(lambda state, x=i: self._handle_show_axes_check(x))
             box['show_animation'].toggled.connect(lambda state, x=i: self._handle_show_animation_check(x))
@@ -147,7 +145,9 @@ class CalibrationPage(Page):
             self._set_help_text()
             self._hide_buttons()        
             self._update_pages_list()
-            
+
+            self._set_size_of_widgets()
+
             show_animation = False
             
             for i in range(1, self._noBoxes + 1):
@@ -161,10 +161,9 @@ class CalibrationPage(Page):
                     self._handle_show_animation_check(i)
                     
             if not show_animation:
-                self._wizard.show_turning_dir_pub.publish(False)
+                self._wizard.publish_turning_direction(False)
             
         else:
-            #self._wizard.show_turning_dir_pub.publish(False)
             for i in range(1, self._noBoxes + 1):
                 if self._boxes_parts[i]['frame'] != None:
                     self._rviz_set_update_interval(self._boxes_parts[i]['frame'], 0)
@@ -208,11 +207,19 @@ class CalibrationPage(Page):
 
         for i in range(1, self._noBoxes + 1):
             self._box_widgets[i].setFixedSize(box_width, height - top - bottom)
+            
+            display = self._boxes_parts[i]['display']
+            pixmap = self._boxes_parts[i]['pixmap']
+            pixmap = self._resize_with_aspect_ratio(pixmap, display.width(), display.height())
+            
+            self._boxes_parts[i]['display'].layout().widget(0).setFixedSize(pixmap.width(), pixmap.height())
+            self._boxes_parts[i]['display'].layout().widget(0).setPixmap(pixmap)
+            
             width_left -= (box_width + spacing)
             #if i < self._noBoxes and self._lines != {}:
             #    width_left -= (line_width + spacing)
 
-        self.spacer.changeSize(width_left + spacing, 20)
+        self.spacer.changeSize(width_left + spacing, 20)          
                 
     def resizeEvent(self, resizeEvent):
         self._set_size_of_widgets()
@@ -229,27 +236,23 @@ class CalibrationPage(Page):
         else:
             box['inc_ui'].setText(str(box['inc_val']))
 
-    def _handle_button_inc(self, boxNo):
+    def _handle_inc_and_dec_button(self, boxNo, sign):
         box = self._boxes_parts[boxNo]
-        box['angle_val'] += float(box['inc_val'])
+        box['angle_val'] += sign * float(box['inc_val'])
+        
+        
+        outside_range_str = ('Range of joint offset of ' + str(box['box'].title()) + ': [' + 
+                             str(self._wizard.offset_mins[box['joint']]) + ', ' + 
+                             str(self._wizard.offset_maxs[box['joint']]) + '].')
         if box['angle_val'] > self._wizard.offset_maxs[box['joint']]:
             box['angle_val'] = self._wizard.offset_maxs[box['joint']]
-            print('Maximum value for joint offset of ' + box['box'].title() + ' [' +
-                str(self._wizard.offset_mins[box['joint']]) + ', ' + 
-                str(self._wizard.offset_maxs[box['joint']]) + '].')
-        box['angle_ui'].setText(str(box['angle_val']))
-        self._wizard.configuration_client.update_configuration({box['joint']: box['angle_val']})
-
-    def _handle_button_dec(self, boxNo):
-        box = self._boxes_parts[boxNo]
-        box['angle_val'] -= float(box['inc_val'])
-        if box['angle_val'] < self._wizard.offset_mins[box['joint']]:
+            print(outside_range_str)
+        elif box['angle_val'] < self._wizard.offset_mins[box['joint']]:
             box['angle_val'] = self._wizard.offset_mins[box['joint']]
-            print('Minimum value for joint offset of ' + box['box'].title() + ' [' + 
-                str(self._wizard.offset_mins[box['joint']]) + ', ' + 
-                str(self._wizard.offset_maxs[box['joint']]) + '].')
+            print(outside_range_str)
+                
         box['angle_ui'].setText(str(box['angle_val']))
-        self._wizard.configuration_client.update_configuration({box['joint']: box['angle_val']})
+        self._wizard.update_joint_configuration(box['joint'], box['angle_val'])
         
     def _handle_reset_button(self, boxNo):
         box = self._boxes_parts[boxNo]
@@ -320,11 +323,11 @@ class CalibrationPage(Page):
                 if not i == boxNo and self._boxes_parts[i]['frame'] != None:
                     self._boxes_parts[i]['show_animation'].setChecked(False)
                     self._rviz_set_update_interval(self._boxes_parts[i]['frame'], 1e100)
-            self._publish_visualized_joint(self._boxes_parts[boxNo]['joint'])        
-            self._wizard.show_turning_dir_pub.publish(True)
+            self._wizard.publish_visualized_joint(self._boxes_parts[boxNo]['joint'])        
+            self._wizard.publish_turning_direction(True)
             self._rviz_set_update_interval(self._boxes_parts[boxNo]['frame'], 0)
         else:
-            self._wizard.show_turning_dir_pub.publish(False)
+            self._wizard.publish_turning_direction(False)
             
             animated = False
             for i in range(1, self._noBoxes + 1):
@@ -347,4 +350,17 @@ class CalibrationPage(Page):
                 
         return True
 
-
+    def _resize_with_aspect_ratio(self, pixmap, w, h):
+        pixmap_2 = ''
+        if w < h:
+            pixmap_2 = pixmap.scaledToWidth(w, mode=1)
+            h_pix = pixmap_2.height()
+            if h_pix > h:
+                pixmap_2 = pixmap.scaledToHeight(h, mode=1)
+        else:
+            pixmap_2 = pixmap.scaledToHeight(h, mode=1)
+            w_pix = pixmap_2.width()
+            if w_pix > w:
+                pixmap_2 = pixmap.scaledToWidth(w, mode=1)
+                
+        return pixmap_2
