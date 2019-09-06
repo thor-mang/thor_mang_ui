@@ -4,8 +4,10 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
         - "/Johnny #51"
-      Splitter Ratio: 0.8111110925674438
+        - /Footstep Planning1/RobotModel1/Status1
+      Splitter Ratio: 0.5790960192680359
     Tree Height: 604
   - Class: rviz/Selection
     Name: Selection
@@ -25,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Visisted Steps
+    SyncSource: ""
   - Class: rviz_visual_tools/RvizVisualToolsGui
     Name: RvizVisualToolsGui
 Preferences:
@@ -53,220 +55,6 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
-    - Class: rviz/Group
-      Displays:
-        - Alpha: 1
-          Class: rviz/RobotModel
-          Collision Enabled: false
-          Enabled: false
-          Links:
-            All Links Enabled: true
-            Expand Joint Details: false
-            Expand Link Details: false
-            Expand Tree: false
-            Link Tree Style: Links in Alphabetic Order
-          Name: RobotModel
-          Robot Description: robot_description
-          TF Prefix: ""
-          Update Interval: 0
-          Value: false
-          Visual Enabled: true
-        - Class: rviz/TF
-          Enabled: false
-          Frame Timeout: 15
-          Frames:
-            All Enabled: false
-          Marker Scale: 1
-          Name: TF
-          Show Arrows: true
-          Show Axes: true
-          Show Names: true
-          Tree:
-            {}
-          Update Interval: 0
-          Value: false
-        - Alpha: 1
-          Autocompute Intensity Bounds: true
-          Autocompute Value Bounds:
-            Max Value: 10
-            Min Value: -10
-            Value: true
-          Axis: Z
-          Channel Name: intensity
-          Class: rviz/LaserScan
-          Color: 255; 255; 255
-          Color Transformer: Intensity
-          Decay Time: 20
-          Enabled: false
-          Invert Rainbow: false
-          Max Color: 255; 255; 255
-          Max Intensity: 0
-          Min Color: 0; 0; 0
-          Min Intensity: 0
-          Name: Head Laser
-          Position Transformer: XYZ
-          Queue Size: 10
-          Selectable: true
-          Size (Pixels): 3
-          Size (m): 0.009999999776482582
-          Style: Flat Squares
-          Topic: /johnny5/sensor/head_lidar/scan
-          Unreliable: false
-          Use Fixed Frame: true
-          Use rainbow: false
-          Value: false
-        - Alpha: 1
-          Autocompute Intensity Bounds: true
-          Autocompute Value Bounds:
-            Max Value: 0.1409435272216797
-            Min Value: 0.053150296211242676
-            Value: true
-          Axis: Z
-          Channel Name: z
-          Class: rviz/PointCloud2
-          Color: 255; 255; 255
-          Color Transformer: Intensity
-          Decay Time: 20
-          Enabled: false
-          Invert Rainbow: false
-          Max Color: 255; 255; 255
-          Max Intensity: 0
-          Min Color: 0; 0; 0
-          Min Intensity: 0
-          Name: Scan Cloud Filtered
-          Position Transformer: XYZ
-          Queue Size: 10
-          Selectable: true
-          Size (Pixels): 3
-          Size (m): 0.009999999776482582
-          Style: Flat Squares
-          Topic: /johnny5/scan_cloud_filtered
-          Unreliable: false
-          Use Fixed Frame: true
-          Use rainbow: true
-          Value: false
-        - Class: rviz/Group
-          Displays:
-            - Alpha: 1
-              Arrow Width: 0.5
-              Class: rviz/WrenchStamped
-              Enabled: true
-              Force Arrow Scale: 2
-              Force Color: 204; 51; 51
-              Hide Small Values: true
-              History Length: 1
-              Name: Left Wrist
-              Topic: /johnny5/sensor/ft/left_wrist/raw
-              Torque Arrow Scale: 2
-              Torque Color: 204; 204; 51
-              Unreliable: false
-              Value: true
-            - Alpha: 1
-              Arrow Width: 0.5
-              Class: rviz/WrenchStamped
-              Enabled: true
-              Force Arrow Scale: 2
-              Force Color: 204; 51; 51
-              Hide Small Values: true
-              History Length: 1
-              Name: Right Wrist
-              Topic: /johnny5/sensor/ft/right_wrist/raw
-              Torque Arrow Scale: 2
-              Torque Color: 204; 204; 51
-              Unreliable: false
-              Value: true
-            - Alpha: 1
-              Arrow Width: 0.5
-              Class: rviz/WrenchStamped
-              Enabled: true
-              Force Arrow Scale: 2
-              Force Color: 204; 51; 51
-              Hide Small Values: true
-              History Length: 1
-              Name: Left Foot
-              Topic: /johnny5/sensor/ft/left_foot/raw
-              Torque Arrow Scale: 2
-              Torque Color: 204; 204; 51
-              Unreliable: false
-              Value: true
-            - Alpha: 1
-              Arrow Width: 0.5
-              Class: rviz/WrenchStamped
-              Enabled: true
-              Force Arrow Scale: 2
-              Force Color: 204; 51; 51
-              Hide Small Values: true
-              History Length: 1
-              Name: Right Foot
-              Topic: /johnny5/sensor/ft/right_foot/raw
-              Torque Arrow Scale: 2
-              Torque Color: 204; 204; 51
-              Unreliable: false
-              Value: true
-          Enabled: false
-          Name: FT Raw
-        - Class: rviz/Group
-          Displays:
-            - Alpha: 1
-              Arrow Width: 0.5
-              Class: rviz/WrenchStamped
-              Enabled: true
-              Force Arrow Scale: 2
-              Force Color: 204; 51; 51
-              Hide Small Values: true
-              History Length: 1
-              Name: Left Wrist
-              Topic: /johnny5/sensor/ft/left_wrist/scaled
-              Torque Arrow Scale: 2
-              Torque Color: 204; 204; 51
-              Unreliable: false
-              Value: true
-            - Alpha: 1
-              Arrow Width: 0.5
-              Class: rviz/WrenchStamped
-              Enabled: true
-              Force Arrow Scale: 2
-              Force Color: 204; 51; 51
-              Hide Small Values: true
-              History Length: 1
-              Name: Right Wrist
-              Topic: /johnny5/sensor/ft/right_wrist/scaled
-              Torque Arrow Scale: 2
-              Torque Color: 204; 204; 51
-              Unreliable: false
-              Value: true
-            - Alpha: 1
-              Arrow Width: 0.5
-              Class: rviz/WrenchStamped
-              Enabled: true
-              Force Arrow Scale: 2
-              Force Color: 204; 51; 51
-              Hide Small Values: true
-              History Length: 1
-              Name: Left Foot
-              Topic: /johnny5/sensor/ft/left_foot/scaled
-              Torque Arrow Scale: 2
-              Torque Color: 204; 204; 51
-              Unreliable: false
-              Value: true
-            - Alpha: 1
-              Arrow Width: 0.5
-              Class: rviz/WrenchStamped
-              Enabled: true
-              Force Arrow Scale: 2
-              Force Color: 204; 51; 51
-              Hide Small Values: true
-              History Length: 1
-              Name: Right Foot
-              Topic: /johnny5/sensor/ft/right_foot/scaled
-              Torque Arrow Scale: 2
-              Torque Color: 204; 204; 51
-              Unreliable: false
-              Value: true
-          Enabled: false
-          Name: FT Scaled
-      Enabled: true
-      Name: "Johnny #5"
     - Class: rviz/Group
       Displays:
         - Alpha: 1
@@ -524,17 +312,230 @@ Visualization Manager:
               Show Trail: false
           Name: RobotModel
           Robot Description: robot_description
-          TF Prefix: planning_vis
+          TF Prefix: ""
           Update Interval: 0
           Value: true
+          Visual Enabled: true
+        - Class: rviz/TF
+          Enabled: false
+          Frame Timeout: 15
+          Frames:
+            All Enabled: false
+          Marker Scale: 1
+          Name: TF
+          Show Arrows: true
+          Show Axes: true
+          Show Names: true
+          Tree:
+            {}
+          Update Interval: 0
+          Value: false
+        - Alpha: 1
+          Autocompute Intensity Bounds: true
+          Autocompute Value Bounds:
+            Max Value: 10
+            Min Value: -10
+            Value: true
+          Axis: Z
+          Channel Name: intensity
+          Class: rviz/LaserScan
+          Color: 255; 255; 255
+          Color Transformer: Intensity
+          Decay Time: 20
+          Enabled: false
+          Invert Rainbow: false
+          Max Color: 255; 255; 255
+          Max Intensity: 0
+          Min Color: 0; 0; 0
+          Min Intensity: 0
+          Name: Head Laser
+          Position Transformer: XYZ
+          Queue Size: 10
+          Selectable: true
+          Size (Pixels): 3
+          Size (m): 0.009999999776482582
+          Style: Flat Squares
+          Topic: /johnny5/sensor/head_lidar/scan
+          Unreliable: false
+          Use Fixed Frame: true
+          Use rainbow: false
+          Value: false
+        - Alpha: 1
+          Autocompute Intensity Bounds: true
+          Autocompute Value Bounds:
+            Max Value: 0.1409435272216797
+            Min Value: 0.053150296211242676
+            Value: true
+          Axis: Z
+          Channel Name: z
+          Class: rviz/PointCloud2
+          Color: 255; 255; 255
+          Color Transformer: Intensity
+          Decay Time: 20
+          Enabled: false
+          Invert Rainbow: false
+          Max Color: 255; 255; 255
+          Max Intensity: 0
+          Min Color: 0; 0; 0
+          Min Intensity: 0
+          Name: Scan Cloud Filtered
+          Position Transformer: XYZ
+          Queue Size: 10
+          Selectable: true
+          Size (Pixels): 3
+          Size (m): 0.009999999776482582
+          Style: Flat Squares
+          Topic: /johnny5/scan_cloud_filtered
+          Unreliable: false
+          Use Fixed Frame: true
+          Use rainbow: true
+          Value: false
+        - Class: rviz/Group
+          Displays:
+            - Alpha: 1
+              Arrow Width: 0.5
+              Class: rviz/WrenchStamped
+              Enabled: true
+              Force Arrow Scale: 2
+              Force Color: 204; 51; 51
+              Hide Small Values: true
+              History Length: 1
+              Name: Left Wrist
+              Topic: /johnny5/sensor/ft/left_wrist/raw
+              Torque Arrow Scale: 2
+              Torque Color: 204; 204; 51
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Arrow Width: 0.5
+              Class: rviz/WrenchStamped
+              Enabled: true
+              Force Arrow Scale: 2
+              Force Color: 204; 51; 51
+              Hide Small Values: true
+              History Length: 1
+              Name: Right Wrist
+              Topic: /johnny5/sensor/ft/right_wrist/raw
+              Torque Arrow Scale: 2
+              Torque Color: 204; 204; 51
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Arrow Width: 0.5
+              Class: rviz/WrenchStamped
+              Enabled: true
+              Force Arrow Scale: 2
+              Force Color: 204; 51; 51
+              Hide Small Values: true
+              History Length: 1
+              Name: Left Foot
+              Topic: /johnny5/sensor/ft/left_foot/raw
+              Torque Arrow Scale: 2
+              Torque Color: 204; 204; 51
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Arrow Width: 0.5
+              Class: rviz/WrenchStamped
+              Enabled: true
+              Force Arrow Scale: 2
+              Force Color: 204; 51; 51
+              Hide Small Values: true
+              History Length: 1
+              Name: Right Foot
+              Topic: /johnny5/sensor/ft/right_foot/raw
+              Torque Arrow Scale: 2
+              Torque Color: 204; 204; 51
+              Unreliable: false
+              Value: true
+          Enabled: false
+          Name: FT Raw
+        - Class: rviz/Group
+          Displays:
+            - Alpha: 1
+              Arrow Width: 0.5
+              Class: rviz/WrenchStamped
+              Enabled: true
+              Force Arrow Scale: 2
+              Force Color: 204; 51; 51
+              Hide Small Values: true
+              History Length: 1
+              Name: Left Wrist
+              Topic: /johnny5/sensor/ft/left_wrist/scaled
+              Torque Arrow Scale: 2
+              Torque Color: 204; 204; 51
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Arrow Width: 0.5
+              Class: rviz/WrenchStamped
+              Enabled: true
+              Force Arrow Scale: 2
+              Force Color: 204; 51; 51
+              Hide Small Values: true
+              History Length: 1
+              Name: Right Wrist
+              Topic: /johnny5/sensor/ft/right_wrist/scaled
+              Torque Arrow Scale: 2
+              Torque Color: 204; 204; 51
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Arrow Width: 0.5
+              Class: rviz/WrenchStamped
+              Enabled: true
+              Force Arrow Scale: 2
+              Force Color: 204; 51; 51
+              Hide Small Values: true
+              History Length: 1
+              Name: Left Foot
+              Topic: /johnny5/sensor/ft/left_foot/scaled
+              Torque Arrow Scale: 2
+              Torque Color: 204; 204; 51
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Arrow Width: 0.5
+              Class: rviz/WrenchStamped
+              Enabled: true
+              Force Arrow Scale: 2
+              Force Color: 204; 51; 51
+              Hide Small Values: true
+              History Length: 1
+              Name: Right Foot
+              Topic: /johnny5/sensor/ft/right_foot/scaled
+              Torque Arrow Scale: 2
+              Torque Color: 204; 204; 51
+              Unreliable: false
+              Value: true
+          Enabled: false
+          Name: FT Scaled
+      Enabled: true
+      Name: "Johnny #5"
+    - Class: rviz/Group
+      Displays:
+        - Alpha: 1
+          Class: rviz/RobotModel
+          Collision Enabled: false
+          Enabled: false
+          Links:
+            All Links Enabled: true
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Link Tree Style: Links in Alphabetic Order
+          Name: RobotModel
+          Robot Description: robot_description
+          TF Prefix: planning_vis
+          Update Interval: 0
+          Value: false
           Visual Enabled: true
         - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: /johnny5/footstep_planning/vis/step_plan_vis
           Name: Step Plan
           Namespaces:
-            foot: true
-            step_idx: true
+            {}
           Queue Size: 100
           Value: true
         - Alpha: 1
@@ -573,7 +574,7 @@ Visualization Manager:
           Marker Topic: /johnny5/footstep_planning/vis/start_feet_pose
           Name: Start
           Namespaces:
-            foot: true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -581,7 +582,7 @@ Visualization Manager:
           Marker Topic: /johnny5/footstep_planning/vis/goal_feet_pose
           Name: Goal
           Namespaces:
-            foot: true
+            {}
           Queue Size: 100
           Value: true
         - Alpha: 1
