@@ -23,6 +23,8 @@ class Page(QWidget):
         self._id = id
         self._wizard = wizard
         
+        #self.ui = QWidget()
+        
         # load wizard ui - header line and page change buttons
         if ui_name != '':
             rp = rospkg.RosPack()
@@ -65,7 +67,7 @@ class Page(QWidget):
                             break
         
         return groups
-        
+       
     def _position_from_joint_name(self, key):
             
         left = False
@@ -94,8 +96,10 @@ class Page(QWidget):
         return line
 
     def _set_help_text(self):
+        help_text = ''
         if 'page_help_text' in self._wizard.page_config[self._id]:
-            self._wizard.page_help_text_label.setText(self._wizard.page_config[self._id]['page_help_text'])
+            help_text = self._wizard.page_config[self._id]['page_help_text']
+        self._wizard.page_help_text_label.setText(help_text)
 
 #________ rviz functions __________________________________________________________________________  
         
@@ -165,7 +169,7 @@ class Page(QWidget):
         
         
 #________ helper functions ________________________________________________________________________            
-            
+                       
     def _string_to_float(self, text):
         valid = False
         value = -1

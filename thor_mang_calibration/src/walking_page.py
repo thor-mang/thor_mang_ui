@@ -26,7 +26,7 @@ from calibration_page import CalibrationPage
 class WalkingCalibrationPage(CalibrationPage):
     _id = -1
     
-    _noBoxes = 2
+    _noBoxes = -1
     
     _initial_increment = 0.1
     
@@ -95,8 +95,10 @@ class WalkingCalibrationPage(CalibrationPage):
                     self._handle_rviz_check(i)
                 
         else:
-            self._boxes_parts[1]['frame'] = None
-            self._boxes_parts[2]['frame'] = None
+            for i in range(1, self._noBoxes + 1):
+                if self._boxes_parts[i]['frame'] != None:
+                    self._rviz_set_update_interval(self._boxes_parts[i]['frame'], 0)
+                    self._boxes_parts[i]['frame'] = None
             
 
     def _hide_buttons(self):
@@ -108,32 +110,37 @@ class WalkingCalibrationPage(CalibrationPage):
         
         max_boxes = self._wizard.max_joints
         
-        line_width = 0
+        if max_boxes != -1:
         
-        if self._lines != {}:
-            line_width = self._lines[1].width()
+            if max_boxes == self._noBoxes:
+                max_boxes += 1 # to account for walking panel
         
-        left, top, right, bottom = self.page_layout.getContentsMargins()
-        spacing = self.page_layout.spacing()
-
-        box_width = int((width - spacing * (max_boxes) - left - right)/max_boxes)
-
-        width_left = width - left - right
-
-        for i in range(1, self._noBoxes + 1):
-            self._box_widgets[i].setFixedSize(box_width, height - top - bottom)
+            line_width = 0
             
-            display = self._boxes_parts[i]['display']
-            pixmap = self._boxes_parts[i]['pixmap']
-
-            pixmap = self._resize_with_aspect_ratio(pixmap, display.width(), display.height())
+            if self._lines != {}:
+                line_width = self._lines[1].width()
             
-            self._boxes_parts[i]['display'].layout().widget(0).setFixedSize(pixmap.width(), pixmap.height())
-            self._boxes_parts[i]['display'].layout().widget(0).setPixmap(pixmap)
-            
-            width_left -= (box_width + spacing)
+            left, top, right, bottom = self.page_layout.getContentsMargins()
+            spacing = self.page_layout.spacing()
 
-        self.spacer.changeSize(width_left + spacing, 20)
+            box_width = int((width - spacing * max_boxes - left - right)/max_boxes)
+
+            width_left = width - left - right
+
+            for i in range(1, self._noBoxes + 1):
+                self._box_widgets[i].setFixedSize(box_width, height - top - bottom)
+                
+                display = self._boxes_parts[i]['display']
+                pixmap = self._boxes_parts[i]['pixmap']
+
+                pixmap = self._resize_with_aspect_ratio(pixmap, display.width(), display.height())
+                
+                self._boxes_parts[i]['display'].layout().widget(0).setFixedSize(pixmap.width(), pixmap.height())
+                self._boxes_parts[i]['display'].layout().widget(0).setPixmap(pixmap)
+                
+                width_left -= (box_width + spacing)
+
+            self.spacer.changeSize(width_left + spacing, 20)
 
 
 #_______ button functions _________________________________________________________________________   

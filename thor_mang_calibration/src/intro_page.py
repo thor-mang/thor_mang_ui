@@ -18,7 +18,7 @@ class IntroPage(Page):
         
         # add rviz frame to layout
         frame = self._wizard.rviz_frames[1]
-        self.gridLayout_2.addWidget(frame, 1, 1)
+        self.page_layout.addWidget(frame, 1, 1)
         
         # hide buttons not needed on this page
         self._hide_buttons()
@@ -28,13 +28,13 @@ class IntroPage(Page):
         keys = paths.keys()
         
         for key in sorted(keys):
-            self.paths_list.addItem(str(key))
+            self.path_list.addItem(str(key))
         
         # first button as default calibration mode
-        self.paths_list.currentItemChanged.connect(self._handle_pages_list_changed)
+        self.path_list.currentItemChanged.connect(self._handle_pages_list_changed)
         frame.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
         
-        self.paths_list.setCurrentRow(0)
+        self.path_list.setCurrentRow(0)
         
     def _hide_buttons(self):
         self._wizard.back_button.setVisible(False)
@@ -45,7 +45,7 @@ class IntroPage(Page):
         
     def _handle_pages_list_changed(self):
         paths = self._wizard.paths
-        self._set_alpha(paths[self.paths_list.currentItem().text()]['show'])
+        self._set_alpha(paths[self.path_list.currentItem().text()]['show'])
         
     def _set_alpha(self, part):
         frame = self._wizard.rviz_frames[1]
@@ -69,7 +69,7 @@ class IntroPage(Page):
             
             frame = self._wizard.rviz_frames[1]
 
-            self.gridLayout_2.addWidget(frame, 1, 1)
+            self.page_layout.addWidget(frame, 1, 1)
             frame.setVisible(True)
             frame.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
             self._set_rviz_view(frame, 'Front View')
@@ -79,10 +79,10 @@ class IntroPage(Page):
             if self._wizard.path_name != '':
                 self._set_alpha(self._wizard.paths[self._wizard.path_name]['show'])
             else:
-                self._set_alpha(self._wizard.paths[self.paths_list.currentItem().text()]['show'])
+                self._set_alpha(self._wizard.paths[self.path_list.currentItem().text()]['show'])
                 
             self._wizard.publish_turning_direction(False)
             
     def get_chosen_path(self):
-        return self.paths_list.currentItem().text()
+        return self.path_list.currentItem().text()
             

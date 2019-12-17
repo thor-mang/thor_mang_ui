@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <launch>
 
-  <param name="/use_sim_time" value = "false"/>
+  <param name="/use_sim_time" value="false"/>
   
   <arg name="robot_name" default="thormang3" />
   <arg name="l_hand_type" default="$(optenv L_HAND_TYPE none)" />
   <arg name="r_hand_type" default="$(optenv R_HAND_TYPE none)" />
+
+  <arg name="use_gazebo" default="true" />
   
   <!-- in Hz -->
   <arg name="rate" default="60"/>
@@ -13,6 +15,8 @@
   <arg name="preview_turning_speed" default="2.0"/>
 
   <group ns="calibration">
+    <param name="offset_path" value="$(find thormang3_manager)/config/offset.yaml"/>
+
     <param name="tf_prefix" value="calibration"/>
 
     <include file="$(find thormang3_description)/launch/load_robot_description.launch">
@@ -29,7 +33,9 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     
   </group>
-  <param name="/use_sim_time" value = "true"/>
+  
+  <param name="calibration/use_gazebo" value="$(arg use_gazebo)"/>
+  
   <node name="thormang3_foot_step_generator" pkg="thormang3_foot_step_generator" type="thormang3_foot_step_generator_node" output="screen"/>
   <node name="calibration_widget" pkg="thor_mang_calibration" type="calibration" output="screen" />
 

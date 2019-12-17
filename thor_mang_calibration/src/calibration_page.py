@@ -20,7 +20,7 @@ class CalibrationPage(Page):
 
     _initial_increment = 0.1
 
-    _noBoxes = 3
+    _noBoxes = -1
 
     def __init__(self, id, ui_name, wizard = None):
         super(CalibrationPage, self).__init__(id, '', wizard)
@@ -29,42 +29,15 @@ class CalibrationPage(Page):
         
         self.page_layout = QGridLayout()
         self.setLayout(self.page_layout)
-        # assembling ui parts & related variables into dicts
-        #self._box1 = {
-        #    'joint': '', 'inc_val': self._initial_increment, 'angle_val': None, # variables
-        #    'frame': None, 'enable_frame': self.box1_enable_rviz_check, 'show_axes': self.box1_show_axes_check, 
-        #    'show_animation': self.box1_show_animation_check, # rviz (including line above)
-        #    'inc_ui': self.box1_incSize, 'angle_ui': self.box1_angle, 'tip': self.box1_tip, # ui edits
-        #    'layout_ui': self.box1_layout, 'box': self.box1, 'display': self.box1_display, # other ui parts
-        #    'inc_button': self.box1_inc, 'dec_button': self.box1_dec#, 'reset_button': self.box1_reset_button # ui buttons
-        #    }
-        #self._box2 = {
-        #    'joint': '', 'inc_val': self._initial_increment, 'angle_val': None, 
-        #    'frame': None, 'enable_frame': self.box2_enable_rviz_check, 'show_axes': self.box2_show_axes_check,
-        #    'show_animation': self.box2_show_animation_check, 
-        #    'inc_ui': self.box2_incSize, 'angle_ui': self.box2_angle, 'tip': self.box2_tip, 
-        #    'layout_ui': self.box2_layout, 'box': self.box2, 'display': self.box2_display, 
-        #    'inc_button': self.box2_inc, 'dec_button': self.box2_dec#, 'reset_button': self.box2_reset_button
-        #    }
-        #self._box3 = {
-        #    'joint': '', 'inc_val': self._initial_increment, 'angle_val': None, 
-        #    'frame': None, 'enable_frame': self.box3_enable_rviz_check, 'show_axes': self.box3_show_axes_check, 
-        #    'show_animation': self.box3_show_animation_check,
-        #    'inc_ui': self.box3_incSize, 'angle_ui': self.box3_angle, 'tip': self.box3_tip, 
-        #    'layout_ui': self.box3_layout, 'box': self.box3, 'display': self.box3_display, 
-        #    'inc_button': self.box3_inc, 'dec_button': self.box3_dec#, 'reset_button': self.box3_reset_button 
-        #    }
 
         self._box_widgets = {}
-        self._boxes_parts = {}#{1: self._box1, 2: self._box2, 3: self._box3}
-        self._lines = {}#{2: self.line_1, 3: self.line_2}        
+        self._boxes_parts = {}
+        self._lines = {}       
 
         self._setup()
-        #self._set_size_of_widgets() 
-        
-        #self.resize(self.width(), self.height())
         
         for i in range(1, self._noBoxes + 1):
+            continue
             self._boxes_parts[i]['display'].setEnabled(True)
 
     def _setup(self):
@@ -73,8 +46,6 @@ class CalibrationPage(Page):
         id = str(self._id)
         
         self._noBoxes = info['num_joints']
-
-        #self.page_label.setText(self._joint_designation_to_name(id))
         
         rp = rospkg.RosPack()
         
@@ -82,13 +53,14 @@ class CalibrationPage(Page):
         item_count = 0
         
         for i in range(1, self._noBoxes + 1):
-            cal_box = CalibrationBox()
+            cal_box = CalibrationBox().ui
+            
             self._box_widgets[i] = cal_box
             
             self._boxes_parts[i] = self._find_box_parts(cal_box)#self._boxes_parts[i]
             if i > 1:
                 line = self._make_line(QFrame.VLine)
- 
+            
             self.page_layout.addWidget(cal_box, 0, item_count)
             item_count += 1
             
@@ -103,7 +75,7 @@ class CalibrationPage(Page):
             else:
                 print "Error: Parameter " + box['joint'] + " not found."
                 box['angle_val'] = ''
-
+            
             # set initial values
             box['box'].setTitle(str(box['joint']))#self._joint_designation_to_name(id) + ' ' + str(info[i]['rotation']).capitalize() + ":")
             if 'joint_specific_help' in info[i]:
@@ -117,11 +89,10 @@ class CalibrationPage(Page):
             img.setScaledContents(True)
             img.setPixmap(pix)
             self._boxes_parts[i]['pixmap'] = pix
-            
             # prepare image/rviz presentation
             layout = QStackedLayout()
-            layout.addWidget(img)
             box['display'].setLayout(layout)
+            layout.addWidget(img)
             
             # connect signals
             box['inc_ui'].editingFinished.connect(lambda state, x=i: self._handle_incSize(x))
@@ -134,11 +105,7 @@ class CalibrationPage(Page):
         
         self.spacer = QSpacerItem(1, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.page_layout.addItem(self.spacer, 0, item_count)
-        # close unneeded parts of the ui
-        #for i in reversed(range(self._noBoxes + 1, 4)):
-        #    self._boxes_parts[i]['box'].close()
-        #    self._lines[i].close()
-        
+
         
     def _update(self):
         if self.isVisible():                 
@@ -193,33 +160,35 @@ class CalibrationPage(Page):
         
         max_boxes = self._wizard.max_joints
         
-        line_width = 0
+        if max_boxes != -1:
         
-        if self._lines != {}:
-            line_width = self._lines[1].width()
-        
-        left, top, right, bottom = self.page_layout.getContentsMargins()
-        spacing = self.page_layout.spacing()
-
-        box_width = int((width - spacing * (max_boxes) - left - right)/max_boxes)
-
-        width_left = width - left - right
-
-        for i in range(1, self._noBoxes + 1):
-            self._box_widgets[i].setFixedSize(box_width, height - top - bottom)
+            line_width = 0
             
-            display = self._boxes_parts[i]['display']
-            pixmap = self._boxes_parts[i]['pixmap']
-            pixmap = self._resize_with_aspect_ratio(pixmap, display.width(), display.height())
+            if self._lines != {}:
+                line_width = self._lines[1].width()
             
-            self._boxes_parts[i]['display'].layout().widget(0).setFixedSize(pixmap.width(), pixmap.height())
-            self._boxes_parts[i]['display'].layout().widget(0).setPixmap(pixmap)
-            
-            width_left -= (box_width + spacing)
-            #if i < self._noBoxes and self._lines != {}:
-            #    width_left -= (line_width + spacing)
+            left, top, right, bottom = self.page_layout.getContentsMargins()
+            spacing = self.page_layout.spacing()
 
-        self.spacer.changeSize(width_left + spacing, 20)          
+            box_width = int((width - spacing * (max_boxes) - left - right)/max_boxes)
+
+            width_left = width - left - right
+
+            for i in range(1, self._noBoxes + 1):
+                self._box_widgets[i].setFixedSize(box_width, height - top - bottom)
+                
+                display = self._boxes_parts[i]['display']
+                pixmap = self._boxes_parts[i]['pixmap']
+                pixmap = self._resize_with_aspect_ratio(pixmap, display.width(), display.height())
+                
+                self._boxes_parts[i]['display'].layout().widget(0).setFixedSize(pixmap.width(), pixmap.height())
+                self._boxes_parts[i]['display'].layout().widget(0).setPixmap(pixmap)
+                
+                width_left -= (box_width + spacing)
+                #if i < self._noBoxes and self._lines != {}:
+                #    width_left -= (line_width + spacing)
+
+            self.spacer.changeSize(width_left + spacing, 20)          
                 
     def resizeEvent(self, resizeEvent):
         self._set_size_of_widgets()

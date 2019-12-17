@@ -10,6 +10,8 @@ import rosnode
 import actionlib
 import xml.dom.minidom
 
+from rosgraph_msgs.msg import Clock
+
 import copy
 import math
 
@@ -78,13 +80,6 @@ class CalibrationWizard(QWidget):
             
             self._setup_wizard_variables()
             
-            # set window title
-            if context.serial_number() > 1:
-                self.setWindowTitle(self.windowTitle() + (' (%d)' % context.serial_number()))
-                                    
-            # add wizard to the context
-            context.add_widget(self)
-
             self._create_publishers_and_clients()
             
             ns = rospy.get_namespace()            
@@ -107,14 +102,26 @@ class CalibrationWizard(QWidget):
             
             self.preview_pose_pub.publish(msg)
             
-            rospy.set_param('/use_sim_time', 'false')
-            # rviz frames used on multiple pages
+            rospy.set_param('/use_sim_time', 'False')
+            # rviz frames used on multiple page_dict
             self.rviz_frames = {1: self._create_rviz_frame()}
                         
-            self.pages.insertWidget(0, IntroPage('Intro', 'intro_page.ui', self))
+            print('generating pages...')
+            self.page_dict = self._generate_page_dict()
+            print('done')
+            
+            self.pages.insertWidget(0, self.page_dict['Intro'])
             self.pages.setCurrentIndex(0)
             
             self.torque_off_radio_button.setChecked(True)
+            
+            # set window title
+            if context.serial_number() > 1:
+                self.setWindowTitle(self.windowTitle() + (' (%d)' % context.serial_number()))
+                                    
+            # add wizard to the context
+            context.add_widget(self)
+
             
         else:
             print("Missing dynamic reconfigure server from thormang3_manager. Shutting down.")
@@ -193,7 +200,7 @@ class CalibrationWizard(QWidget):
     
     def _init_pose(self):
         rp = rospkg.RosPack()
-        poses_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', 'calibration_poses.yaml')  
+        poses_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', 'pose_config.yaml')  
         f = open(poses_path, 'r')
         poses = load(f)
         f.close()
@@ -216,7 +223,7 @@ class CalibrationWizard(QWidget):
         self.reset = False
         
         rp = rospkg.RosPack()
-        offset_path = os.path.join(rp.get_path('thormang3_manager'), 'config', 'offset.yaml')
+        offset_path = rospy.get_param('calibration/offset_path') 
         f = open(offset_path, 'r')
         self.stored_offsets = (load(f))["offset"]
         f.close()
@@ -224,10 +231,11 @@ class CalibrationWizard(QWidget):
         self.pose = self._init_pose()
         self.joint_limits = self._get_joints_information_from_robot()
         self.page_config = self._load_from_config('page_config.yaml')
+        self.joint_overview = self._load_from_config('joint_overview_config.yaml')
         
         self.max_joints = -1
         
-        self.paths = self._load_from_config('paths.yaml')
+        self.paths = self._load_from_config('path_config.yaml')
         self.path_name = ''
         self.path = []          
         
@@ -266,6 +274,9 @@ class CalibrationWizard(QWidget):
         
         self.ini_pose_pub = rospy.Publisher("robotis/base/ini_pose", String, queue_size=10)
         
+        if rospy.get_param('calibration/use_gazebo') == True:
+            self.clock = rospy.Subscriber("/clock", Clock, self._log_clock)
+        
         ns = rospy.get_namespace()
         self.trajectory_controller_names = rospy.get_param(ns + 'control_mode_switcher/control_mode_to_controllers/whole_body/desired_controllers_to_start')
         self.trajectory_controllers = []
@@ -291,7 +302,7 @@ class CalibrationWizard(QWidget):
         reader = rviz.YamlConfigReader()
         config = rviz.Config()
         rp = rospkg.RosPack()
-        reader.readFile(config, os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config','config.rviz'))
+        reader.readFile(config, os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config','rviz_config.rviz'))
         rviz_frame.load(config)
         rviz_frame.setMenuBar(None)
         rviz_frame.setStatusBar(None)
@@ -299,12 +310,32 @@ class CalibrationWizard(QWidget):
         
         return rviz_frame
         
+    def _generate_page_dict(self):
+        page_dict = {}
+  
+        for key in self.page_config.keys():
+            if str(key).find('Intro') != -1:
+                page = IntroPage(str(key), 'intro_page.ui', self)
+            elif str(key).find('Pose') != -1:
+              page = PosePage(str(key), 'pose_page.ui', self)
+            elif str(key).find('Summary') != -1:
+             page = SummaryPage(str(key), 'summary_page.ui', self)
+            elif str(key).find('Walking Calibration') != -1:
+                page = WalkingCalibrationPage(str(key), '', self)
+            else:
+                page = CalibrationPage(str(key), '', self)
+                
+            page.setVisible(False)
+            page_dict[str(key)] = page
+            
+        return page_dict
+        
     def _setup_pages(self):
         path_picked = self.pages.currentWidget().get_chosen_path()
              
         if path_picked != self.path_name:
-            print('Adding pages to wizard...')
-            pages = self.pages
+            print('Adding page_dict to wizard...')
+            page_dict = self.pages
         
             self._clear_pages()
             self._add_pages_to_wizard(path_picked)
@@ -317,30 +348,22 @@ class CalibrationWizard(QWidget):
             print('Done!')
         
     def _clear_pages(self):
-        pages = self.pages
-        
-        if pages.count() > 1:
-            for i in reversed(range(2, pages.count() + 1)):
-                pages.removeWidget(pages.widget(i))
+        if self.pages.count() > 1:
+            for i in reversed(range(2, self.pages.count() + 1)):
+                self.pages.removeWidget(self.pages.widget(i))
     
     
     def _add_pages_to_wizard(self, path):
-        pages = self.pages
         path = self.paths[path]['path']
-        self.path = ['Intro'] + path + ['Summary']
+        self.path = path + ['Summary']
         
         i = 1
             
-        for page in path:
-            if str(page).find('Pose') != -1:
-                pages.insertWidget(i, PosePage(str(page), 'pose_page.ui', self))
-            elif str(page).find('Walking Calibration') != -1:
-                pages.insertWidget(i, WalkingCalibrationPage(str(page), 'calibration_page.ui', self))
-            else:
-                pages.insertWidget(i, CalibrationPage(str(page), 'calibration_page.ui', self))   
+        for page in self.path:
+            self.pages.insertWidget(i, self.page_dict[str(page)])
             i += 1
-                
-        pages.insertWidget(i, SummaryPage('Summary', 'summary_page.ui', self))
+            
+        self.path = ['Intro'] + self.path
 
     def _add_pages_to_list(self):
         self.page_list.setMaxVisibleItems(5)       
@@ -493,7 +516,7 @@ class CalibrationWizard(QWidget):
             self.configuration_client.update_configuration({'save_config':True})
         elif self.reset:
             rp = rospkg.RosPack()
-            offset_path = os.path.join(rp.get_path('thormang3_manager'), 'config', 'offset.yaml')
+            offset_path = rospy.get_param('calibration/offset_path')
             f = open(offset_path, 'r')
             yamlfile = load(f)
             f.close()
@@ -541,6 +564,9 @@ class CalibrationWizard(QWidget):
     def update_joint_configuration(self, joint, value):
         self.configuration_client.update_configuration({joint: value})
     
+    def _log_clock(self, data):
+        self._clock = data.clock
+    
     # ___ for control mode ____________
     
     def _log_control_mode(self, data):
@@ -575,7 +601,10 @@ class CalibrationWizard(QWidget):
     def send_controller_trajectories(self, joint_trajectories):
         controllers = self.trajectory_controllers
         for i in range(0, len(controllers)):
-            joint_trajectories[i].header.stamp = rospy.Time.now()
+            if rospy.get_param('calibration/use_gazebo') == True:
+                joint_trajectories[i].header.stamp = self._clock
+            else:
+                joint_trajectories[i].header.stamp = rospy.Time.now()
             controllers[i].publish(joint_trajectories[i])
 
     # ___ for preview pose ____________

@@ -8,12 +8,15 @@ import rospkg
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QRadioButton, QVBoxLayout, QLineEdit, QLabel, QSpacerItem, QSizePolicy, QFrame
 from python_qt_binding.QtGui import QValidator, QDoubleValidator
+from python_qt_binding.QtCore import Qt
 
 from sensor_msgs.msg import JointState
 
 from yaml import load, dump
 
 from page import Page
+
+from tab_widget import TabWidget
 
 import copy
 import math
@@ -27,13 +30,9 @@ class PosePage(Page):
         
         self.poses = self._load_calibration_poses()
         
-        #self._radioButtons = []
-              
-        #self._buttonLayout = QVBoxLayout()
+        #self._add_labels_and_edits_to_tab()
 
-        self._add_labels_and_edits_to_tab()
-
-        #self._add_pose_radio_buttons()
+        self.customTab = self._setupCustomTab()
 
         self._add_poses_to_list()
 
@@ -61,7 +60,7 @@ class PosePage(Page):
             self._update_pages_list()
             
             frame = self._wizard.rviz_frames[1]
-            self.verticalLayout.insertWidget(0, frame)
+            self.preview_layout.insertWidget(0, frame)
             
             frame.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
             frame.setVisible(True)
@@ -83,88 +82,19 @@ class PosePage(Page):
         self._wizard.line_3.setVisible(False)
         self._wizard.finish_button.setVisible(False)
         
-    def _add_labels_and_edits_to_tab(self):
-        self._lineEdits = {}
-
-        arm_counter_left = 1
-        arm_counter_right = 1
-        leg_counter_left = 1
-        leg_counter_right = 1
-        other_counter = 0
+    def _setupCustomTab(self):
+        self.customTab = TabWidget()
+        label_dicts = self.customTab.setup_tab_widget(self._wizard.joint_overview, 1, False)
+        self._lineEdits = label_dicts[0]
         
-        self.customTab.widget(0).layout().addWidget(QLabel('<b>Left [deg]:</b>'), 0, 0)
-        self.customTab.widget(0).layout().addWidget(QLabel('<b>Right [deg]:</b>'), 0, 4)
-        self.customTab.widget(1).layout().addWidget(QLabel('<b>Left [deg]:</b>'), 0, 0)
-        self.customTab.widget(1).layout().addWidget(QLabel('<b>Right [deg]:</b>'), 0, 4)
+        self.customTab.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         
-        groups = self._sort_joints_by_group()
-                                       
-        for g in self._wizard.page_config['groups']:
-            #joint = self._wizard.page_config[key]
-            group = groups[g]
-            arm, leg, left, right = False, False, False, False
-            for i in range(len(group)):
-                name = group[i]
-                arm, leg, left, right = self._position_from_joint_name(name)
-                
-                label = QLabel(str(group[i]))
-                edit = QLineEdit()
-                edit.setMaximumWidth(80)
-                
-                self._lineEdits[name] = edit
-                
-                if arm and left:
-                    self._add_label_and_edit(label, edit, 0, arm_counter_left, 0)
-                    arm_counter_left += 1
-                elif arm and right:
-                    self._add_label_and_edit(label, edit, 0, arm_counter_right, 4)
-                    arm_counter_right += 1
-                elif leg and left:
-                    self._add_label_and_edit(label, edit, 1, leg_counter_left, 0)
-                    leg_counter_left += 1
-                elif leg and right:
-                    self._add_label_and_edit(label, edit, 1, leg_counter_right, 4)
-                    leg_counter_right += 1
-                else:
-                    self._add_label_and_edit(label, edit, 2, other_counter, 0)
-                    other_counter += 1
-                    
-            line = self._make_line(QFrame.HLine)
-            
-            if arm and left:
-                self.customTab.widget(0).layout().addWidget(line, arm_counter_left, 0, 1, 2)
-                arm_counter_left += 1
-            elif arm and right:
-                self.customTab.widget(0).layout().addWidget(line, arm_counter_right, 4, 1, 2)
-                arm_counter_right += 1
-            elif leg and left:
-                self.customTab.widget(1).layout().addWidget(line, leg_counter_left, 0, 1, 2)
-                leg_counter_left += 1
-            elif leg and right:
-                self.customTab.widget(1).layout().addWidget(line, leg_counter_right, 4, 1, 2)
-                leg_counter_right += 1
-            else:
-                self.customTab.widget(2).layout().addWidget(line, other_counter, 0, 1, 2)
-                other_counter += 1
+        self.page_layout.addWidget(self.customTab, 0, 1, Qt.AlignTop)
         
-        line = self._make_line(QFrame.VLine)
-        self.customTab.widget(0).layout().addWidget(line, 0, 3, arm_counter_left, 2)
-        line2 = self._make_line(QFrame.VLine)
-        self.customTab.widget(1).layout().addWidget(line2, 0, 3, leg_counter_left, 2)
+        for key in self._lineEdits.keys():
+            edit = self._lineEdits[key]
+            edit.setReadOnly(False)
         
-        self._add_spacers()
-
-    def _add_label_and_edit(self, label, edit, tab_num, row, column_start):
-        self.customTab.widget(tab_num).layout().addWidget(label, row, column_start)
-        self.customTab.widget(tab_num).layout().addWidget(edit, row, column_start + 1)
-
-    def _add_spacers(self):
-        self.customTab.widget(0).layout().addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
-        self.customTab.widget(0).layout().addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 6)
-        self.customTab.widget(1).layout().addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
-        self.customTab.widget(1).layout().addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 6)
-        self.customTab.widget(2).layout().addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
-        self.customTab.widget(2).layout().addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 6)
     
     def _add_poses_to_list(self):
         for key in sorted(self.poses.keys()):
@@ -258,7 +188,7 @@ class PosePage(Page):
 
     def _load_calibration_poses(self):
         rp = rospkg.RosPack()
-        poses_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', 'calibration_poses.yaml')  
+        poses_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', 'pose_config.yaml')  
         f = open(poses_path, 'r')
         poses = load(f)
         f.close()

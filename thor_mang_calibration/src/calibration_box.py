@@ -13,7 +13,10 @@ class CalibrationBox(QWidget):
 
     def __init__(self):
         super(CalibrationBox, self).__init__() 
+        
+        self.ui = QWidget()
+        
         rp = rospkg.RosPack()
         ui_file = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'ui', 'calibration_box.ui')
-        loadUi(ui_file, self, {'QWidget': QWidget})
+        loadUi(ui_file, self.ui, {'QWidget': QWidget})
         
