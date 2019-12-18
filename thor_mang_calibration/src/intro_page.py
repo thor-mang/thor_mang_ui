@@ -24,7 +24,7 @@ class IntroPage(Page):
         self._hide_buttons()
         self._set_help_text()
         
-        paths = self._wizard.paths        
+        paths = self._wizard.paths      
         keys = paths.keys()
         
         for key in sorted(keys):

@@ -124,13 +124,13 @@ class CalibrationWizard(QWidget):
 
             
         else:
-            print("Missing dynamic reconfigure server from thormang3_manager. Shutting down.")
+            print('Missing dynamic reconfigure server from thormang3_manager. Shutting down.')
             self.shutdown_plugin()
             
         print('Done!')
         
     def shutdown_plugin(self):
-        print "Shutting down ..."
+        print 'Shutting down ...'
         
         if rospy.has_param('joint_offsets'):
         
@@ -163,7 +163,7 @@ class CalibrationWizard(QWidget):
                 print('shutting down foot step generator')
                 killed = rosnode.kill_nodes(nodes)
                 
-        print "Done!"
+        print 'Done!'
 
 
 # __________________________ functions for initial setup ______________________________________________________________
@@ -225,7 +225,7 @@ class CalibrationWizard(QWidget):
         rp = rospkg.RosPack()
         offset_path = rospy.get_param('calibration/offset_path') 
         f = open(offset_path, 'r')
-        self.stored_offsets = (load(f))["offset"]
+        self.stored_offsets = (load(f))['offset']
         f.close()
         
         self.pose = self._init_pose()
@@ -263,19 +263,19 @@ class CalibrationWizard(QWidget):
         # ensure that saving doesn't happen after each configuration
         self.configuration_client.update_configuration({'save_config':False})
         
-        self.module_control_pub =  rospy.Publisher("robotis/enable_ctrl_module", String, queue_size=10)
-        self.walking_command_pub = rospy.Publisher("robotis/thormang3_foot_step_generator/walking_command", FootStepCommand, queue_size=10)
+        self.module_control_pub =  rospy.Publisher('robotis/enable_ctrl_module', String, queue_size=10)
+        self.walking_command_pub = rospy.Publisher('robotis/thormang3_foot_step_generator/walking_command', FootStepCommand, queue_size=10)
         
-        self.sync_write_pub = rospy.Publisher("robotis/sync_write_item", SyncWriteItem, queue_size=10)
+        self.sync_write_pub = rospy.Publisher('robotis/sync_write_item', SyncWriteItem, queue_size=10)
         
-        self.preview_pose_pub = rospy.Publisher("calibration/preview_pose", JointState, queue_size=10)
-        self.show_turning_dir_pub = rospy.Publisher("calibration/show_joint_turning_direction", Bool, queue_size=10)        
-        self.turning_joint_pub = rospy.Publisher("calibration/turning_joint", String, queue_size=10)
+        self.preview_pose_pub = rospy.Publisher('calibration/preview_pose', JointState, queue_size=10)
+        self.show_turning_dir_pub = rospy.Publisher('calibration/show_joint_turning_direction', Bool, queue_size=10)        
+        self.turning_joint_pub = rospy.Publisher('calibration/turning_joint', String, queue_size=10)
         
-        self.ini_pose_pub = rospy.Publisher("robotis/base/ini_pose", String, queue_size=10)
+        self.ini_pose_pub = rospy.Publisher('robotis/base/ini_pose', String, queue_size=10)
         
         if rospy.get_param('calibration/use_gazebo') == True:
-            self.clock = rospy.Subscriber("/clock", Clock, self._log_clock)
+            self.clock = rospy.Subscriber('/clock', Clock, self._log_clock)
         
         ns = rospy.get_namespace()
         self.trajectory_controller_names = rospy.get_param(ns + 'control_mode_switcher/control_mode_to_controllers/whole_body/desired_controllers_to_start')
@@ -283,8 +283,8 @@ class CalibrationWizard(QWidget):
         self.trajectory_controller_joints = []
         
         self.allow_all_mode_transitions_pub = rospy.Publisher(ns + 'control_mode_switcher/allow_all_mode_transitions', Bool, queue_size=1)
-        self.control_mode_status = rospy.Subscriber(ns + "control_mode_switcher/status", ControlModeStatus, self._log_control_mode)
-        self.set_control_mode_client = actionlib.SimpleActionClient(ns + "control_mode_switcher/change_control_mode", ChangeControlModeAction)
+        self.control_mode_status = rospy.Subscriber(ns + 'control_mode_switcher/status', ControlModeStatus, self._log_control_mode)
+        self.set_control_mode_client = actionlib.SimpleActionClient(ns + 'control_mode_switcher/change_control_mode', ChangeControlModeAction)
         
         for name in self.trajectory_controller_names:
             self.trajectory_controllers.append(rospy.Publisher(ns + 'joints/' + name + '/command', JointTrajectory, queue_size=10))
@@ -363,11 +363,12 @@ class CalibrationWizard(QWidget):
             self.pages.insertWidget(i, self.page_dict[str(page)])
             i += 1
             
+        # intro page has already been added in the init function
         self.path = ['Intro'] + self.path
 
     def _add_pages_to_list(self):
         self.page_list.setMaxVisibleItems(5)       
-        self.page_list.setStyleSheet("QComboBox { combobox-popup: 0; }")
+        self.page_list.setStyleSheet('QComboBox { combobox-popup: 0; }')
 
         for page in self.path:
             self.page_list.addItem((str(page)))
@@ -439,7 +440,7 @@ class CalibrationWizard(QWidget):
                 self.take_position.setEnabled(True)
                 
                 if self.pages.currentWidget()._id != 'Walking Calibration':
-                    self.publish_control_mode("ros_control_module")
+                    self.publish_control_mode('ros_control_module')
 
                     if self._check_control_mode_is_whole_body() == False:
                         self._set_control_mode_to_whole_body()
@@ -454,7 +455,7 @@ class CalibrationWizard(QWidget):
                 msgs = self._create_controller_trajectories()
                 self.send_controller_trajectories(msgs)
             else:
-                self.ini_pose_pub.publish("ini_pose")
+                self.ini_pose_pub.publish('ini_pose')
                 self.walking_ini_pose_taken = True
                 
                 self.walking_module_group.setEnabled(True)
@@ -465,7 +466,7 @@ class CalibrationWizard(QWidget):
     def _handle_walking_module_button(self, enable):
         if enable == True and self.walking_module_on == False:
             if self.walking_ini_pose_taken:
-                self.publish_control_mode("walking_module")
+                self.publish_control_mode('walking_module')
                 self.walking_module_on = True
                 
                 self.pages.currentWidget().walking_panel.setEnabled(True)
@@ -474,7 +475,7 @@ class CalibrationWizard(QWidget):
                 self.walking_module_disable_radio_button.setChecked(True)
                 
         elif enable == False and self.walking_module_on == True:
-            self.publish_control_mode("none")
+            self.publish_control_mode('none')
             self.walking_module_on = False  
             
             self.walking_panel.pages.currentWidget().setDisabled(True) 
@@ -520,7 +521,7 @@ class CalibrationWizard(QWidget):
             f = open(offset_path, 'r')
             yamlfile = load(f)
             f.close()
-            params = yamlfile["offset"]  
+            params = yamlfile['offset']  
             self.configuration_client.update_configuration(params)      
             
         self.configuration_client.close()
@@ -585,7 +586,7 @@ class CalibrationWizard(QWidget):
             
             goal = ChangeControlModeGoal()
             goal.mode_request = 'whole_body'
-            rospy.loginfo("Requesting mode change to " + goal.mode_request + ".")
+            rospy.loginfo('Requesting mode change to ' + goal.mode_request + '.')
 
             self.set_control_mode_client.send_goal(goal)
 
@@ -594,9 +595,9 @@ class CalibrationWizard(QWidget):
             if self.set_control_mode_client.wait_for_result(action_timeout):
                 result = self.set_control_mode_client.get_result()
             else:
-                rospy.logwarn("Didn't receive any results after %.1f sec. Check communcation!" % action_timeout.to_sec())
+                rospy.logwarn('Didn\'t receive any results after %.1f sec. Check communcation!' % action_timeout.to_sec())
         else:
-            rospy.logerr("Can't connect to control mode action server!")
+            rospy.logerr('Can\'t connect to control mode action server!')
 
     def send_controller_trajectories(self, joint_trajectories):
         controllers = self.trajectory_controllers
@@ -649,7 +650,7 @@ class CalibrationWizard(QWidget):
         
     def _create_torque_message(self):
         msg = SyncWriteItem()
-        msg.item_name = "torque_enable"
+        msg.item_name = 'torque_enable'
         msg.joint_name.extend(self.pose.keys())
         msg.value = []
 

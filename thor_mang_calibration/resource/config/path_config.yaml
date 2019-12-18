@@ -19,6 +19,10 @@ arm calibration:
 leg calibration:
     path: ['Pose', 'Left Hip', 'Right Hip', 'Knees', 'Left Ankle', 'Right Ankle']
     show: 'leg'
+
+leg parallelism:
+    path: ['Pose', 'Hips Yaw', 'Hips Pitch', 'Knees Pitch', 'Ankles Pitch']
+    show: 'leg'
     
 walking calibration:
     path: ['Walking Calibration']
