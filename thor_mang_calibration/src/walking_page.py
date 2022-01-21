@@ -9,26 +9,18 @@ import actionlib
 import math
 
 from python_qt_binding import loadUi
+from python_qt_binding.QtCore import pyqtSignal
 from python_qt_binding.QtWidgets import QWidget, QFrame
-
-#from rosparam import load_file, upload_params
-#from yaml import load, dump
-
-from robotis_controller_msgs.msg import SyncWriteItem
-
-from thormang3_foot_step_generator.msg import FootStepCommand
-
-from thormang3_manipulation_module_msgs.msg import JointPose
-from std_msgs.msg import String, Bool
 
 from calibration_page import CalibrationPage
 
 class WalkingCalibrationPage(CalibrationPage):
+    footstep_parameters = pyqtSignal(dict)
+    
+    
     _id = -1
     
     _noBoxes = -1
-    
-    _initial_increment = 0.1
     
     _num_steps = 1
     _step_length = 0.1
@@ -36,8 +28,8 @@ class WalkingCalibrationPage(CalibrationPage):
     _step_angle = 0.0
     _step_time = 1.0
 
-    def __init__(self, id, ui_name, wizard = None):
-        super(WalkingCalibrationPage, self).__init__(id, ui_name, wizard)
+    def __init__(self, page_id, config,  offset_limits, rviz_frames):
+        super(WalkingCalibrationPage, self).__init__(page_id, config, offset_limits, rviz_frames)
         
         rp = rospkg.RosPack()
         ui_file = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'ui', 'walking_panel.ui')
@@ -45,8 +37,9 @@ class WalkingCalibrationPage(CalibrationPage):
         loadUi(ui_file, self.walking_panel, {'QWidget': QWidget})
         self.walking_panel.setDisabled(True)
         
-        self.page_layout.addWidget(self.walking_panel, 0, 2)
-        
+        self.page_layout.addWidget(self.walking_panel, 0, config['num_joints'])
+
+        self.page_layout.addItem(self.spacer, 0, config['num_joints'] + 1)
         self._set_initial_values()
 
         # connect signals
@@ -64,11 +57,6 @@ class WalkingCalibrationPage(CalibrationPage):
         self.walking_panel.turn_left_button.clicked[bool].connect(self._take_steps)
         self.walking_panel.turn_right_button.clicked[bool].connect(self._take_steps)
         
-        self._wizard.walking_module_enable_radio_button.toggled[bool].connect(lambda: self._wizard._handle_walking_module_button(True))
-        self._wizard.walking_module_disable_radio_button.toggled[bool].connect(lambda: self._wizard._handle_walking_module_button(False))
-        
-        self._wizard.walking_module_disable_radio_button.setChecked(True)
-        
         
     def _set_initial_values(self):       
         # initial step parameters
@@ -78,48 +66,47 @@ class WalkingCalibrationPage(CalibrationPage):
         self.walking_panel.angle_edit.setText(str(self._step_angle))
         self.walking_panel.step_time_edit.setText(str(self._step_time))
 
-    def _update(self):
+    def update(self):
         if self.isVisible():
-            self._set_help_text()
-            self._hide_buttons()
-            self._update_pages_list()
-             
             self._set_size_of_widgets()   
-                
+            
+            show_animation = False
+            
             joints = []
             for i in range(1, self._noBoxes + 1):
-                self._boxes_parts[i]['frame'] = self._wizard.rviz_frames[i]
-                self._boxes_parts[i]['display'].layout().addWidget(self._boxes_parts[i]['frame'])
-                self._hide_all_joint_axes(self._boxes_parts[i]['frame'])
-                if self._boxes_parts[i]['enable_frame'].isChecked():
-                    self._handle_rviz_check(i)
+                self._box_widgets[i].ui.frame = self.rviz_frames[i]
+                self._box_widgets[i].ui.display.layout().addWidget(self._box_widgets[i].ui.frame)
+                self._hide_all_joint_axes(self._box_widgets[i].ui.frame)
+                if self._box_widgets[i].ui.enable_rviz_check.isChecked():
+                    self._box_widgets[i].ui.enable_rviz_check.setChecked(False)
+                    self._box_widgets[i].ui.enable_rviz_check.setChecked(True)
+                
+                
+                if self._box_widgets[i].ui.show_animation_check.isChecked():
+                    show_animation = True
+                    self._box_widgets[i].ui.show_animation_check.setChecked(False)
+                    self._box_widgets[i].ui.show_animation_check.setChecked(True)
+                    
+            if not show_animation:
+                self.show_animation.emit(False)
                 
         else:
             for i in range(1, self._noBoxes + 1):
-                if self._boxes_parts[i]['frame'] != None:
-                    self._rviz_set_update_interval(self._boxes_parts[i]['frame'], 0)
-                    self._boxes_parts[i]['frame'] = None
+                if self._box_widgets[i].ui.frame != None:
+                    self._rviz_set_update_interval(self._box_widgets[i].ui.frame, 0)
+                    self._box_widgets[i].ui.frame = None
             
-
-    def _hide_buttons(self):
-        self._wizard.finish_button.setVisible(False)
         
     def _set_size_of_widgets(self):
         width = self.parent().width()
         height = self.parent().height()
         
-        max_boxes = self._wizard.max_joints
+        max_boxes = self.max_joints
         
         if max_boxes != -1:
-        
             if max_boxes == self._noBoxes:
                 max_boxes += 1 # to account for walking panel
-        
-            line_width = 0
-            
-            if self._lines != {}:
-                line_width = self._lines[1].width()
-            
+
             left, top, right, bottom = self.page_layout.getContentsMargins()
             spacing = self.page_layout.spacing()
 
@@ -130,15 +117,18 @@ class WalkingCalibrationPage(CalibrationPage):
             for i in range(1, self._noBoxes + 1):
                 self._box_widgets[i].setFixedSize(box_width, height - top - bottom)
                 
-                display = self._boxes_parts[i]['display']
-                pixmap = self._boxes_parts[i]['pixmap']
+                display = self._box_widgets[i].ui.display
+                pixmap = self._box_widgets[i].pixmap
 
                 pixmap = self._resize_with_aspect_ratio(pixmap, display.width(), display.height())
                 
-                self._boxes_parts[i]['display'].layout().widget(0).setFixedSize(pixmap.width(), pixmap.height())
-                self._boxes_parts[i]['display'].layout().widget(0).setPixmap(pixmap)
+                self._box_widgets[i].ui.display.layout().widget(0).setFixedSize(pixmap.width(), pixmap.height())
+                self._box_widgets[i].ui.display.layout().widget(0).setPixmap(pixmap)
                 
                 width_left -= (box_width + spacing)
+                
+            self.walking_panel.setFixedSize(box_width, height - top - bottom)
+            width_left -= (box_width + spacing)
 
             self.spacer.changeSize(width_left + spacing, 20)
 
@@ -146,15 +136,17 @@ class WalkingCalibrationPage(CalibrationPage):
 #_______ button functions _________________________________________________________________________   
 
     def _take_steps(self):
-        if self._wizard.walking_module_on:
-            msg = FootStepCommand()
-            command = self.sender().text().lower()
-            
-            self._wizard.publish_footstep_command(command, self._num_steps, self._step_time,
-                                    self._step_length, self._side_step_length, self._step_angle)
-        else:
-            print('Turn walking module on before attempting to take steps.')
-            
+        command = self.sender().text().lower()
+        
+        params = {'command': command}
+        params['num_steps'] = self._num_steps
+        params['step_time'] = self._step_time
+        params['step_length'] = self._step_length
+        params['side_step_length'] = self._side_step_length
+        params['step_angle'] = self._step_angle
+        
+        self.footstep_parameters.emit(params)
+        
         
 #_______ edit functions ___________________________________________________________________________              
             

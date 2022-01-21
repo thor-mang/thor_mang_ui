@@ -3,19 +3,21 @@
 import copy
 import os
 
-import rospkg
+import rospy
 
-from yaml import load
-
+from python_qt_binding.QtCore import pyqtSignal
 from python_qt_binding.QtWidgets import QLabel, QLineEdit, QSpacerItem, QSizePolicy, QFrame
 
 from page import Page
 
 from tab_widget import TabWidget
 
+
 class SummaryPage(Page):
-    def __init__(self, id, ui_name, wizard = None):
-        super(SummaryPage, self).__init__(id, ui_name, wizard)    
+    save_state = pyqtSignal(int)    
+    
+    def __init__(self, page_id, config, joint_overview):
+        super(SummaryPage, self).__init__(page_id, config, 'summary_page.ui')    
         
         self._id = id
         
@@ -23,7 +25,7 @@ class SummaryPage(Page):
         self._lineEdits_new_calibration = {}
 
         self._overview_tab = TabWidget()
-        label_dicts = self._overview_tab.setup_tab_widget(self._wizard.joint_overview, 2, True)
+        label_dicts = self._overview_tab.setup_tab_widget(joint_overview, 2, True)
         
         self._lineEdits_old_calibration = label_dicts[0]
         self._lineEdits_new_calibration = label_dicts[1]
@@ -40,28 +42,16 @@ class SummaryPage(Page):
         self.save_button.toggled[bool].connect(self._handle_button_set)
         self.reset_button.toggled[bool].connect(self._handle_button_set)
         self.nosave_button.toggled[bool].connect(self._handle_button_set)
-        
-        
-    def _update(self):
+
+    def update(self):
         if self.isVisible():
-            self._set_help_text()
-            self._hide_buttons()
-            self._update_pages_list()    
-        
             # get old parameters in order to check for changes
-            rp = rospkg.RosPack()
-            offset_path = os.path.join(rp.get_path('thormang3_manager'), 'config', 'offset.yaml')
-            f = open(offset_path, 'r')
-            yamlfile = load(f)
-            f.close()
-            old_calibration = yamlfile["offset"]
-            
-            # grab new parameters
-            new_calibration = self._wizard.configuration_client.get_configuration()
-            
+            old_calibration = self.get_old_offset_parameters()
+            # get new parameters
+            new_calibration = rospy.get_param(self._joint_offset_ns)
+            # compare old and new parameters
             self._check_and_set_changes(old_calibration, new_calibration)
-            
-        
+
     def _check_and_set_changes(self, old_calibration, new_calibration):
         
         for i in range(self._overview_tab.count()):
@@ -69,10 +59,10 @@ class SummaryPage(Page):
 
         for key in self._lineEdits_old_calibration.keys():
             arm, leg, left, right = self._position_from_joint_name(key)
-            self._lineEdits_old_calibration[key].setText(str(old_calibration[key]))
+            self._lineEdits_old_calibration[key].setText(str(round(old_calibration[key], 5))) # 5 decimal digits
             # float equality check
             if abs(abs(old_calibration[key]) - abs(new_calibration[key])) >= 1e-8:
-                self._lineEdits_new_calibration[key].setText(str(new_calibration[key]))
+                self._lineEdits_new_calibration[key].setText(str(round(new_calibration[key], 5))) # 5 decimal digits
                 self._lineEdits_new_calibration[key].setEnabled(True)
                 self._lineEdits_new_calibration[key].setStyleSheet("color: red;")
                 
@@ -92,28 +82,12 @@ class SummaryPage(Page):
                 self._lineEdits_new_calibration[key].setDisabled(True)
                 
 
-
-#_____________________________ ui changes _________________________________________________________
-
-    def _hide_buttons(self):
-        self._wizard.header_widget.setVisible(False)
-        self._wizard.line_4.setVisible(False)
-        self._wizard.next_button.setVisible(False)
-
 #_______ button functions _________________________________________________________________________  
             
     def _handle_button_set(self):
         if self.save_button.isChecked():
-            self._wizard.save = True
-            self._wizard.reset = False
-            self._wizard.no_save = False
+            self.save_state.emit(0)
         elif self.reset_button.isChecked():
-            self._wizard.save = False
-            self._wizard.reset = True
-            self._wizard.no_save = False
+            self.save_state.emit(1)
         elif self.nosave_button.isChecked():
-            self._wizard.save = False
-            self._wizard.reset = False
-            self._wizard.no_save = True
-
-        
+            self.save_state.emit(2)

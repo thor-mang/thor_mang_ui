@@ -5,69 +5,39 @@ import os
 import rospy
 import rospkg
 
-import rviz
+from yaml import load
 
 from python_qt_binding import loadUi
-from python_qt_binding.QtCore import QObject
+from python_qt_binding.QtCore import QObject, pyqtSignal
 from python_qt_binding.QtGui import QValidator, QDoubleValidator, QIntValidator
 from python_qt_binding.QtWidgets import QWidget, QFrame, QLayout
 
-from std_msgs.msg import String
-
 
 class Page(QWidget):
+    show_animation = pyqtSignal(bool)
 
-    def __init__(self, id, ui_name, wizard = None):
-        super(Page, self).__init__(wizard) 
+    def __init__(self, page_id, config, ui_name = None):
+        super(Page, self).__init__() 
         
-        self._id = id
-        self._wizard = wizard
+        self._page_id = page_id
+        self._config = config
         
-        #self.ui = QWidget()
+        # joint offset namespace
+        self._joint_offset_ns = str(rospy.get_namespace()) + 'joint_offsets/'
         
         # load wizard ui - header line and page change buttons
-        if ui_name != '':
+        if ui_name != None:
             rp = rospkg.RosPack()
             ui_file = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'ui', ui_name)
             loadUi(ui_file, self, {'QWidget': QWidget})
         
-        self._wizard.pages.currentChanged[int].connect(self._update)
-        
             
 #________ common functions ________________________________________________________________________
 
-    def _update_pages_list(self):
-        path = self._wizard.path
-        current = 0
-        
-        for page in path:
-            if page == self._id:
-                self._wizard.page_list.setCurrentIndex(current)
-                return
-            current += 1
+    def update(self):
+        # empty function, should be implemented for each page type
+        pass
             
-        return -1
-        
-    def _sort_joints_by_group(self):
-        groups = {}
-        for g in self._wizard.page_config['groups']:
-            groups[g] = []
-        
-        
-        for key in self._wizard.page_config.keys():
-            if key == 'Walking Calibration':
-                continue
-            entry = self._wizard.page_config[key]
-            if type(entry) == dict and 'num_joints' in entry.keys():
-                for i in range(1, self._wizard.page_config[key]['num_joints'] + 1):
-                    joint_name = self._wizard.page_config[key][i]['name']
-                    for group_name in self._wizard.page_config['groups']:
-                        if str(joint_name).lower().find(str(group_name)) != -1:
-                            groups[group_name] = groups[group_name] + [joint_name]
-                            break
-        
-        return groups
-       
     def _position_from_joint_name(self, key):
             
         left = False
@@ -95,11 +65,17 @@ class Page(QWidget):
                 
         return line
 
-    def _set_help_text(self):
-        help_text = ''
-        if 'page_help_text' in self._wizard.page_config[self._id]:
-            help_text = self._wizard.page_config[self._id]['page_help_text']
-        self._wizard.page_help_text_label.setText(help_text)
+
+    def get_old_offset_parameters(self):
+        # get old parameters in order to check for changes
+        rp = rospkg.RosPack()
+        offset_path = os.path.join(rp.get_path('thormang3_manager'), 'config', 'offset.yaml')
+        f = open(offset_path, 'r')
+        yamlfile = load(f)
+        f.close()
+        old_offsets = yamlfile["offset"]
+        
+        return old_offsets
 
 #________ rviz functions __________________________________________________________________________  
         
@@ -143,6 +119,17 @@ class Page(QWidget):
                     link.subProp('Alpha').setValue(0.1)
                 else:
                     link.subProp('Alpha').setValue(1.0)
+
+
+    def _set_all_alpha_to_one(self, frame):
+        robot_display = self._get_robot_state_display(frame)
+        
+        links = robot_display.subProp('Links')
+        
+        for i in range(0, links.numChildren()):
+            # a link has several properties, using this to exclude options
+            if links.childAt(i).getName().find('link') != -1:        
+                links.childAt(i).subProp('Alpha').setValue(1.0)
         
         
     def _rviz_view_set_distance(self, rviz_frame, distance):

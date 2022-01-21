@@ -1,0 +1,33 @@
+# vertices used for automatic calibration
+# real world measurements w.r.t the coordinate system of the named link
+
+l_arm_wr_p_link:
+    # smallest point in link coordinate system, i.e. "most negative" or closest to zero, expressed im meters
+    start_point: [50e-3, -102e-3, 0]
+    checkerboard:
+        rows: 5
+        cols: 7
+        distance: 50e-3 # 5 cm in meters
+        
+r_arm_wr_p_link:
+    start_point: [50e-3, -102e-3, 0]
+    checkerboard:
+        rows: 5
+        cols: 7
+        distance: 50e-3 # 5 cm in meters
+        
+        
+l_leg_foot_link:
+
+    start_point: [170e-3, 10e-3, 50e-3]
+    checkerboard:
+        rows: 5
+        cols: 7
+        distance: 100e-3 # 5 cm in meters
+        
+r_leg_foot_link:
+    start_point: [170e-3, 10e-3, 50e-3]
+    checkerboard:
+        rows: 5
+        cols: 7
+        distance: 100e-3 # 5 cm in meters

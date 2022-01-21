@@ -60,6 +60,7 @@ class TabBar(QTabBar):
 
         painter.restore()
 
+
 class TabWidget(QTabWidget):
     def __init__(self, tabs = None):
         super(TabWidget, self).__init__()
@@ -83,11 +84,9 @@ class TabWidget(QTabWidget):
                     if str(column).find(part) == -1:
                         continue
                     ordered_columns = ordered_columns + [column]
-                    
-                    
+
         return ordered_columns
-                    
-        
+
     def setup_tab_widget(self, config, no_line_edits, show_arrow):
         
         line_edit_dicts = {}
@@ -112,13 +111,12 @@ class TabWidget(QTabWidget):
             
             for column in tab_columns:
                 row_counter = 0
-                column_layout = QGridLayout()
                 
                 lines = config[tab][column]
                                 
                 label = QLabel('<b>' + str(column) + ': </b>')
 
-                zero_pos = column_counter * (no_cols_per_entry)
+                zero_pos = column_counter * no_cols_per_entry
 
                 layout.addWidget(label, row_counter, zero_pos)
                 
@@ -133,8 +131,7 @@ class TabWidget(QTabWidget):
                         for i in range(0, no_line_edits):
                             edit = QLineEdit()
                             edit.setMaximumWidth(80)
-                            #edit.setReadOnly(True)
-                            
+
                             line_edit_dicts[i][item] = edit
                             
                             layout.addWidget(edit, row_counter, zero_pos + position)
@@ -154,8 +151,6 @@ class TabWidget(QTabWidget):
                     
                     layout.addWidget(line, row_counter, zero_pos, 1, no_line_edits + 1 + 1 * int(show_arrow))
                     row_counter += 1
-                    
-                spacer = QSpacerItem(40, 1, QSizePolicy.Minimum, QSizePolicy.Expanding)
                    
                 column_counter += 1
                 

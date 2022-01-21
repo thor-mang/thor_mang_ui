@@ -144,8 +144,8 @@ QGroupBox::title#box {
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>326</width>
-             <height>116</height>
+             <width>340</width>
+             <height>58</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -199,7 +199,7 @@ QGroupBox::title#box {
            <enum>QLayout::SetNoConstraint</enum>
           </property>
           <item row="1" column="4">
-           <widget class="QPushButton" name="inc">
+           <widget class="QPushButton" name="inc_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -211,6 +211,9 @@ QGroupBox::title#box {
               <width>30</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increase the offset value by the step size specified above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>+</string>
@@ -218,7 +221,7 @@ QGroupBox::title#box {
            </widget>
           </item>
           <item row="0" column="3">
-           <widget class="QLineEdit" name="incSize">
+           <widget class="QLineEdit" name="step_size">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -230,11 +233,14 @@ QGroupBox::title#box {
               <width>75</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the amount that hte offset value below will change upon pressing the '+' or '-' button.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
           <item row="1" column="3">
-           <widget class="QLineEdit" name="angle">
+           <widget class="QLineEdit" name="offset">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -247,10 +253,13 @@ QGroupBox::title#box {
               <height>16777215</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;offset value&lt;/span&gt; of the specified joint. &lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change&lt;/span&gt; it with the buttons '&lt;span style=&quot; font-weight:600;&quot;&gt;+&lt;/span&gt;' or '&lt;span style=&quot; font-weight:600;&quot;&gt;-&lt;/span&gt;' , the button '&lt;span style=&quot; font-weight:600;&quot;&gt;reset&lt;/span&gt;' changes it back to the &lt;span style=&quot; font-weight:600;&quot;&gt;default value&lt;/span&gt; from the offset.yaml of the robot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QPushButton" name="dec">
+           <widget class="QPushButton" name="dec_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -262,6 +271,9 @@ QGroupBox::title#box {
               <width>30</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Decrease the offset value by the step size specified above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>-</string>
@@ -275,6 +287,9 @@ QGroupBox::title#box {
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;offset value&lt;/span&gt; of the specified joint. &lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change&lt;/span&gt; it with the buttons '&lt;span style=&quot; font-weight:600;&quot;&gt;+&lt;/span&gt;' or '&lt;span style=&quot; font-weight:600;&quot;&gt;-&lt;/span&gt;' , the button '&lt;span style=&quot; font-weight:600;&quot;&gt;reset&lt;/span&gt;' changes it back to the &lt;span style=&quot; font-weight:600;&quot;&gt;default value&lt;/span&gt; from the offset.yaml of the robot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>offset:</string>
@@ -295,6 +310,9 @@ QGroupBox::title#box {
               <height>16777215</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resets the offset value to the one saved in the offset.yaml of the robot. This &lt;span style=&quot; font-weight:600;&quot;&gt;cannot&lt;/span&gt; be undone.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>reset</string>
             </property>
@@ -307,6 +325,9 @@ QGroupBox::title#box {
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the amount that hte offset value below will change upon pressing the '+' or '-' button.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>step size:</string>
@@ -374,6 +395,9 @@ QGroupBox::title#box {
             <kerning>true</kerning>
            </font>
           </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Activates or deactivates a 3D animation of the joint that will be shown in place of the image.&lt;/p&gt;&lt;p&gt;Also enables the options below.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -415,6 +439,9 @@ QGroupBox::title#box {
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shows the axes of the joint's coordinate system.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string>Show Axes</string>
                </property>
@@ -430,6 +457,9 @@ QGroupBox::title#box {
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rotates the joint shown in the 3D animation in the direction it will turn upon pressing the '+' button below.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string>Animate Rotation</string>

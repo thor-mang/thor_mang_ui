@@ -29,8 +29,32 @@
    <string>ThorMangCalibration</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetNoConstraint</enum>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <property name="horizontalSpacing">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="step_layout">
+     <property name="leftMargin">
+      <number>9</number>
+     </property>
+     <property name="topMargin">
+      <number>9</number>
+     </property>
+     <property name="rightMargin">
+      <number>9</number>
+     </property>
+     <property name="bottomMargin">
+      <number>9</number>
+     </property>
      <item>
       <spacer name="verticalSpacer_5">
        <property name="orientation">
@@ -59,6 +83,9 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QLabel" name="label_7">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the parameters of the steps the robot is supposed to take.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>&lt;b&gt;Step Parameters:&lt;b&gt;</string>
           </property>
@@ -68,6 +95,9 @@
          <layout class="QGridLayout" name="step_parameters">
           <item row="0" column="0">
            <widget class="QLabel" name="num_steps_label">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the number of steps to take.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Number of Steps:</string>
             </property>
@@ -81,10 +111,16 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the length of a single step sideways for the options 'Left' and 'Right'.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="step_length_label">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the length of a single step for the directions 'Forward' and 'Backward'.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Step Length [m]:</string>
             </property>
@@ -92,6 +128,9 @@
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="side_step_label">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the length of a single step sideways for the options 'Left' and 'Right'.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Side Step Length [m]:</string>
             </property>
@@ -105,6 +144,9 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets how far a single step turns the robot for the options 'Turn Left' and 'Turn Right'.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
            </widget>
           </item>
           <item row="1" column="1">
@@ -115,10 +157,16 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the length of a single step for the directions 'Forward' and 'Backward'.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
            </widget>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="angle_label">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets how far a single step turns the robot for the options 'Turn Left' and 'Turn Right'.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Angle [deg]:</string>
             </property>
@@ -132,10 +180,16 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the number of steps to take.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
            </widget>
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="step_time_label">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the time the robot uses to take one step.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Step Time [s]:</string>
             </property>
@@ -148,6 +202,9 @@
               <width>100</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the time the robot uses to take one step.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -162,6 +219,9 @@
         </item>
         <item>
          <widget class="QLabel" name="label_8">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Actually sets the robot in motion in the direction on the button using the parameters specified above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>&lt;b&gt;Take Step:&lt;b&gt;</string>
           </property>
@@ -171,6 +231,9 @@
          <layout class="QGridLayout" name="step_buttons">
           <item row="0" column="1">
            <widget class="QPushButton" name="forward_button">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Actually sets the robot in motion in the direction on the button using the parameters specified above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Forward</string>
             </property>
@@ -178,6 +241,9 @@
           </item>
           <item row="2" column="1">
            <widget class="QPushButton" name="backward_button">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Actually sets the robot in motion in the direction on the button using the parameters specified above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Backward</string>
             </property>
@@ -185,6 +251,9 @@
           </item>
           <item row="0" column="0">
            <widget class="QPushButton" name="turn_left_button">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Actually sets the robot in motion in the direction on the button using the parameters specified above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Turn Left</string>
             </property>
@@ -192,6 +261,9 @@
           </item>
           <item row="1" column="2">
            <widget class="QPushButton" name="right_button">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Actually sets the robot in motion in the direction on the button using the parameters specified above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Right</string>
             </property>
@@ -199,6 +271,9 @@
           </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="left_button">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Actually sets the robot in motion in the direction on the button using the parameters specified above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Left</string>
             </property>
@@ -206,6 +281,9 @@
           </item>
           <item row="1" column="1">
            <widget class="QPushButton" name="stop_button">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Actually sets the robot in motion in the direction on the button using the parameters specified above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Stop</string>
             </property>
@@ -213,6 +291,9 @@
           </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="turn_right_button">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Actually sets the robot in motion in the direction on the button using the parameters specified above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Turn Right</string>
             </property>

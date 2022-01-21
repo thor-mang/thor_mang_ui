@@ -74,6 +74,9 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jump to any page.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="styleSheet">
           <string notr="true"/>
          </property>
@@ -86,6 +89,9 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Finish the wizard and return to the first page.&lt;/p&gt;&lt;p&gt;Your changes to the offsets will be handled according to your choice.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-color: rgb(255, 205, 105);</string>
@@ -103,8 +109,12 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Go to the next page of the wizard.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="styleSheet">
-          <string notr="true">background-color: rgb(255, 205, 105);</string>
+          <string notr="true">background-color: rgb(255, 205, 105);
+</string>
          </property>
          <property name="text">
           <string>Next</string>
@@ -146,6 +156,9 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Return to the previous page of the wizard.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-color: rgb(255, 205, 105);</string>
@@ -195,6 +208,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Turn the torque of all motors on or off.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="styleSheet">
            <string notr="true">QGroupBox{padding-top:15px; margin-top:-15px}</string>
@@ -293,6 +309,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bring the robot into the chosen pose.&lt;/p&gt;&lt;p&gt;Only enabled if motors are torqued.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Take Pose</string>
           </property>
@@ -327,6 +346,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Turn the walking module on or off.&lt;/p&gt;&lt;p&gt;Only enabled if the robot is in its walking pose.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="styleSheet">
            <string notr="true">QGroupBox{padding-top:15px; margin-top:-15px}</string>
@@ -411,6 +433,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="enable_all_rviz_check">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables all 3D visualisations of the robot on the page if checked.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Enable All RVIZ Frames</string>
           </property>

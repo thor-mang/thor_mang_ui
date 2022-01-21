@@ -7,10 +7,12 @@ import sys
 import time
 import xml.dom.minidom
 
+from rosgraph_msgs.msg import Clock
 from std_msgs.msg import Bool, String
 from sensor_msgs.msg import JointState
 
 class JointStatePublisher:
+        
     def __init__(self):
         robot_description = rospy.get_param('robot_description')
         self._robot = xml.dom.minidom.parseString(robot_description).getElementsByTagName('robot')[0]
@@ -51,13 +53,16 @@ class JointStatePublisher:
         
         self.publisher = rospy.Publisher('joint_states', JointState, queue_size = 10)
         
+
     def _receive_preview_pose(self, data):
         for i in range(0, len(data.name)):
             self._preview_pose[data.name[i]] = data.position[i]
             
+
     def _receive_show_turning_dir(self, data):
         self._show_turning_direction = data.data
         
+
     def _receive_turning_joint(self, data):
         self._preview_pose_to_position()
         self._turning_joint = data.data
@@ -70,6 +75,7 @@ class JointStatePublisher:
         
         self._max_val = max_val
         self._min_val = min_val
+
         
     def _get_joints_information_from_robot(self):
         joint_names = []
@@ -90,6 +96,7 @@ class JointStatePublisher:
                 
         return joint_names, joint_limits
         
+        
     def _set_zero_pose(self, joint_names):
         zero_pose = {}
         for name in joint_names:
@@ -97,11 +104,13 @@ class JointStatePublisher:
             
         return zero_pose
         
+        
     def _preview_pose_to_position(self):
         for i in range(0, len(self._joint_state_message.name)):
             name = self._joint_state_message.name[i]
             if name in self._preview_pose.keys():
                 self._joint_state_message.position[i] = self._preview_pose[name]
+        
         
     def _turn_joints(self, time_old):
         for i in range(0, len(self._joint_state_message.name)):
@@ -112,6 +121,7 @@ class JointStatePublisher:
                 return time_now
         return time_now
         
+        
     def _calculate_new_position(self, joint, i, time_old):
         time_now = time.time()
 
@@ -121,6 +131,7 @@ class JointStatePublisher:
             new_val = self._min_val
             
         return time_now, new_val
+        
         
     def _adjust_animation_range_to_joint_limits(self, max_val, min_val, joint):
         upper_limit = self._joint_limits[joint]['max']
@@ -150,9 +161,11 @@ class JointStatePublisher:
             
         return max_val, min_val
         
+        
     def loop(self):
         r = rospy.Rate(self._hz)
         time_now = 0
+        count = 0
         while not rospy.is_shutdown():
             if self._done_with_function:
                 self._done_with_function = False
@@ -166,16 +179,21 @@ class JointStatePublisher:
                     time_now = time.time()
                 
                 self.publisher.publish(self._joint_state_message)
-                
+
+                count += 1
+                #if count % 60 == 0:
+                #    print('debug: joint state publisher is publishing (every 60th publication)')
+
                 self._done_with_function = True
             r.sleep()
+
 
         
 if __name__ == '__main__':
     try:
         rospy.init_node('joint_state_publisher')
         jsp = JointStatePublisher()
-        
+
         jsp.loop()
                 
     except Exception as e:

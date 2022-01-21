@@ -1,0 +1,10 @@
+link: 'head_cam_link'
+link_to_cam_tf:
+    translation: [0, 0, 0]
+    rotation:
+        quaternion:
+            x: -0.5
+            y: 0.5
+            z: -0.5
+            w: 0.5
+        rpy: [-1.5707963, 0, -1.5707963]

@@ -1,14 +1,15 @@
 <?xml version="1.0"?>
 <launch>
 
-  <param name="/use_sim_time" value="false"/>
-  
   <arg name="robot_name" default="thormang3" />
   <arg name="l_hand_type" default="$(optenv L_HAND_TYPE none)" />
   <arg name="r_hand_type" default="$(optenv R_HAND_TYPE none)" />
 
-  <arg name="use_gazebo" default="true" />
-  
+  <arg name="use_sim_time" default="false"/>
+
+  <!-- for testing auto calibration without real checkerboard images, set to false for real checkerboard -->
+  <arg name="generate_test_data" default="false"/>
+
   <!-- in Hz -->
   <arg name="rate" default="60"/>
   <!-- in degrees -->
@@ -28,13 +29,16 @@
     <param name="rate" value="$(arg rate)" type="double"/>
     <param name="preview_turning_speed" value="$(arg preview_turning_speed)" type="double"/>
     
+    <param name="/use_sim_time" value="false"/>
     <node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="-1 0 0 0 0 0 /pelvis_link calibration/pelvis_link 100"/>
     <node name="joint_state_publisher" pkg="thor_mang_calibration" type="joint_state_publisher" output="screen"/>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     
+    
+    <param name="generate_test_data" value="$(arg generate_test_data)"/>
   </group>
   
-  <param name="calibration/use_gazebo" value="$(arg use_gazebo)"/>
+  <param name="/use_sim_time" value="$(arg use_sim_time)"/>
   
   <node name="thormang3_foot_step_generator" pkg="thormang3_foot_step_generator" type="thormang3_foot_step_generator_node" output="screen"/>
   <node name="calibration_widget" pkg="thor_mang_calibration" type="calibration" output="screen" />

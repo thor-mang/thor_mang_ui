@@ -8,17 +8,30 @@
 # (joint name)_link, e.g. l_leg_hip_yaw_link
 # e.g. torso_link does not exist while chest_link does
 
+# debug:
+Placeholder:
+    type: PlaceholderPage
+    page_help_text: None
+
+Automatic:
+    type: AutomaticPage
+    page_help_text: None
+
 Intro:
+    type: IntroPage
     page_help_text: >-
         <span style=" font-weight:600;">Thormang Calibration</span></p><p>
         This wizard will guide you through the calibration of a thormang3 robot.<br/>
+        Most UI elements contain a tooltip accessed by hovering over it. <br/>
         Please pick a calibration path.
-    
+            
 Pose:
+    type: PosePage
     page_help_text: >-
         Please pick a pose for the calibration.<br/>You may define your own pose under Custom.
     
 Walking Calibration:
+    type: WalkingCalibrationPage
     num_joints: 2
     page_help_text: >-
         Adjust the roll angles of both ankles for a better walking performance.<br/>
@@ -35,12 +48,14 @@ Walking Calibration:
         rviz view: 'Close Front View'
     
 Summary:
+    type: SummaryPage
     page_help_text: >-
         <span style=" font-weight:600;">Summary</span></p><p>
         Go over the current calibration and check that everything is correct.<br/>
         Your calibration can be saved, reseted, or kept for now but discarded later (no save).
 
 Left Hip: 
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -62,6 +77,7 @@ Left Hip:
         rviz view: 'Close Left Side View'
         
 Right Hip:
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -82,6 +98,7 @@ Right Hip:
         rviz view: 'Close Right Side View'
         
 Knees: 
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -100,6 +117,7 @@ Knees:
         rviz view: 'Close Right Side View'
 
 Left Ankle: 
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -116,6 +134,7 @@ Left Ankle:
         rviz view: 'Close Front View'
 
 Right Ankle: 
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -131,6 +150,7 @@ Right Ankle:
         pic: 'ankle_roll.png'
         rviz view: 'Close Front View'
 Torso:
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -144,6 +164,7 @@ Torso:
         rviz view: 'Front View'
 
 Head:
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -160,6 +181,7 @@ Head:
         rviz view: 'Close Left Side View'
 
 Left Shoulder:
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -180,6 +202,7 @@ Left Shoulder:
         rviz view: 'Close Top View'
 
 Left Elbow:
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -192,6 +215,7 @@ Left Elbow:
         rviz view: 'Close Top View'
 
 Left Wrist:
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -212,6 +236,7 @@ Left Wrist:
         rviz view: 'Close Top View'
 
 Right Shoulder:
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -232,6 +257,7 @@ Right Shoulder:
         rviz view: 'Close Top View'
 
 Right Elbow:
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -244,6 +270,7 @@ Right Elbow:
         rviz view: 'Close Top View'
 
 Right Wrist:
+    type: CalibrationPage
     page_help_text: >-
         Go over the joints from left to right. <br/> 
         Align the indicated joints by pressing + or -. <br/>
@@ -264,6 +291,7 @@ Right Wrist:
         rviz view: 'Close Top View'
         
 Hips Yaw:
+    type: CalibrationPage
     page_help_text: >-
         Calibrate the hip yaw motors on both sides to be parallel to each other.
     num_joints: 2
@@ -279,6 +307,7 @@ Hips Yaw:
         rviz view: 'Close Right Side View'
         
 Hips Pitch:
+    type: CalibrationPage
     page_help_text: >-
         Calibrate the hip pitch motors on both sides to be parallel to each other.<br/>
         Use a straight board to assure parallelism:<br/>
@@ -297,6 +326,7 @@ Hips Pitch:
         rviz view: 'Close Right Side View'
 
 Knees Pitch:
+    type: CalibrationPage
     page_help_text: >-
         Calibrate the knee pitch motors on both sides to be parallel to each other.<br/>
         Use a straight board to assure parallelism:<br/>
@@ -316,6 +346,7 @@ Knees Pitch:
         rviz view: 'Close Right Side View'
         
 Ankles Pitch:
+    type: CalibrationPage
     page_help_text: >-
         Calibrate the ankle pitch motors on both sides to be parallel to each other.<br/>
         Use a straight board to assure parallelism:<br/>
