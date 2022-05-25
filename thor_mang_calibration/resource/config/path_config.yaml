@@ -19,13 +19,20 @@ arm calibration:
 leg calibration:
     path: ['Pose', 'Left Hip', 'Right Hip', 'Knees', 'Left Ankle', 'Right Ankle']
     show: 'leg'
+
+leg parallelism:
+    path: ['Pose', 'Hips Yaw', 'Hips Pitch', 'Knees Pitch', 'Ankles Pitch']
+    show: 'leg'
     
 walking calibration:
     path: ['Walking Calibration']
     show: 'leg_an_r'
     
-# generates one of each page type
-debug:
-    path: ['Pose', 'Left Hip', 'Knees', 'Walking Calibration']
+automatic calibration:
+    path: ['Automatic']
     show: ''
     
+# include to see a minimal example for inclusion of a program which manages data over multiple pages of its own
+#xPlaceholderx:
+#    path: ['Placeholder']
+#    show: ''

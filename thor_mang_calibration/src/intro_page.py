@@ -9,46 +9,37 @@ from python_qt_binding.QtWidgets import QRadioButton, QVBoxLayout
 from page import Page
 
 class IntroPage(Page):
-    pix_full = 0
-    pix_arm = 0
-    pix_leg = 0
 
-    def __init__(self, id, ui_name, wizard = None):
-        super(IntroPage, self).__init__(id, ui_name, wizard)        
+    def __init__(self, page_id, config, paths, rviz_frame):
+        super(IntroPage, self).__init__(page_id, config, 'intro_page.ui')        
+        
+        self.rviz_frame = rviz_frame
         
         # add rviz frame to layout
-        frame = self._wizard.rviz_frames[1]
-        self.gridLayout_2.addWidget(frame, 1, 1)
+        frame = self.rviz_frame
+        self.page_layout.addWidget(frame, 1, 1)
         
-        # hide buttons not needed on this page
-        self._hide_buttons()
-        self._set_help_text()
-        
-        paths = self._wizard.paths        
-        keys = paths.keys()
+        self.chosen_path = ''
+        self.paths = paths
+        keys = self.paths.keys()
         
         for key in sorted(keys):
-            self.paths_list.addItem(str(key))
+            self.path_list.addItem(str(key))
         
         # first button as default calibration mode
-        self.paths_list.currentItemChanged.connect(self._handle_pages_list_changed)
+        self.path_list.currentItemChanged.connect(self._handle_pages_list_changed)
         frame.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
         
-        self.paths_list.setCurrentRow(0)
+        self.path_list.setCurrentRow(0)
         
-    def _hide_buttons(self):
-        self._wizard.back_button.setVisible(False)
-        self._wizard.finish_button.setVisible(False)
-        self._wizard.page_list.setVisible(False)
-        self._wizard.header_widget.setVisible(False)
-        self._wizard.line_4.setVisible(False)
         
     def _handle_pages_list_changed(self):
-        paths = self._wizard.paths
-        self._set_alpha(paths[self.paths_list.currentItem().text()]['show'])
+        self.chosen_path = self.path_list.currentItem().text()
+        self._set_alpha(self.paths[self.chosen_path]['show'])
+        
         
     def _set_alpha(self, part):
-        frame = self._wizard.rviz_frames[1]
+        frame = self.rviz_frame
         robot_display = self._get_robot_state_display(frame)
          
         links = robot_display.subProp('Links')
@@ -62,27 +53,25 @@ class IntroPage(Page):
                 else:
                     link.subProp('Alpha').setValue(0.25)
                 
-    def _update(self):
+                
+    def update(self):
         if self.isVisible():
-            self._set_help_text()
-            self._hide_buttons()
-            
-            frame = self._wizard.rviz_frames[1]
+            frame = self.rviz_frame
 
-            self.gridLayout_2.addWidget(frame, 1, 1)
+            self.page_layout.addWidget(frame, 1, 1)
             frame.setVisible(True)
             frame.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
             self._set_rviz_view(frame, 'Front View')
             self._focus_rviz_view_on_links(frame, '', 'pelvis')
             self._hide_all_joint_axes(frame)
             
-            if self._wizard.path_name != '':
-                self._set_alpha(self._wizard.paths[self._wizard.path_name]['show'])
+            if self.chosen_path != '':
+                self._set_alpha(self.paths[self.chosen_path]['show'])
             else:
-                self._set_alpha(self._wizard.paths[self.paths_list.currentItem().text()]['show'])
+                self._set_alpha(self.paths[self.path_list.currentItem().text()]['show'])
                 
-            self._wizard.show_turning_dir_pub.publish(False)
+            self.show_animation.emit(False)
+
             
     def get_chosen_path(self):
-        return self.paths_list.currentItem().text()
-            
+        return self.chosen_path

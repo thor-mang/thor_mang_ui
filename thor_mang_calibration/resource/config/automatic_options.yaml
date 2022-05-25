@@ -1,0 +1,59 @@
+- indent: 0
+  list_position: 0
+  name: All
+  panels:
+  - name: Left Arm
+    target_cs: l_arm_wr_p_link
+  - name: Right Arm
+    target_cs: r_arm_wr_p_link
+  - name: Left Leg
+    target_cs: l_leg_foot_link
+  - name: Right Leg
+    target_cs: r_leg_foot_link
+  top_entry: null
+- indent: 1
+  list_position: 1
+  name: Arms
+  panels:
+  - name: Left Arm
+    target_cs: l_arm_wr_p_link
+  - name: Right Arm
+    target_cs: r_arm_wr_p_link
+  top_entry: All
+- indent: 2
+  list_position: 2
+  name: Left Arm
+  panels:
+  - name: Left Arm
+    target_cs: l_arm_wr_p_link
+  top_entry: Arms
+- indent: 2
+  list_position: 3
+  name: Right Arm
+  panels:
+  - name: Right Arm
+    target_cs: r_arm_wr_p_link
+  top_entry: Arms
+- indent: 1
+  list_position: 4
+  name: Legs
+  panels:
+  - name: Left Leg
+    target_cs: l_leg_foot_link
+  - name: Right Leg
+    target_cs: r_leg_foot_link
+  top_entry: All
+- indent: 2
+  list_position: 5
+  name: Left Leg
+  panels:
+  - name: Left Leg
+    target_cs: l_leg_foot_link
+  top_entry: Legs
+- indent: 2
+  list_position: 6
+  name: Right Leg
+  panels:
+  - name: Right Leg
+    target_cs: r_leg_foot_link
+  top_entry: Legs

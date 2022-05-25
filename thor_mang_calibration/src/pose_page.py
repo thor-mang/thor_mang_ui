@@ -8,6 +8,7 @@ import rospkg
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QRadioButton, QVBoxLayout, QLineEdit, QLabel, QSpacerItem, QSizePolicy, QFrame
 from python_qt_binding.QtGui import QValidator, QDoubleValidator
+from python_qt_binding.QtCore import Qt, pyqtSignal
 
 from sensor_msgs.msg import JointState
 
@@ -15,25 +16,26 @@ from yaml import load, dump
 
 from page import Page
 
+from tab_widget import TabWidget
+
 import copy
 import math
 
 class PosePage(Page):
-
-    def __init__(self, id, ui_name, wizard = None):
-        super(PosePage, self).__init__(id, ui_name, wizard)    
-
+    pose_changed = pyqtSignal(dict)
+    
+    def __init__(self, page_id, config, joint_overview, joint_limits, rviz_frame):
+        super(PosePage, self).__init__(page_id, config, 'pose_page.ui')    
+        
+        self.joint_limits = joint_limits
+        
+        self.rviz_frame = rviz_frame
+        
         self._id = id
         
         self.poses = self._load_calibration_poses()
         
-        #self._radioButtons = []
-              
-        #self._buttonLayout = QVBoxLayout()
-
-        self._add_labels_and_edits_to_tab()
-
-        #self._add_pose_radio_buttons()
+        self.customTab = self._setupCustomTab(joint_overview)
 
         self._add_poses_to_list()
 
@@ -42,170 +44,72 @@ class PosePage(Page):
             
         # connect signals
         self.reload_file.clicked[bool].connect(self._handle_reload_file_button)
-        self.pose_list.itemSelectionChanged.connect(self._handle_pages_list_changed)
+        self.pose_list.itemSelectionChanged.connect(self._handle_pose_list_changed)
         
         # for functionality of a custom pose setting
         v = QDoubleValidator()
-        for edit in self._lineEdits.values():
+        for key in self._lineEdits.keys():
+            edit = self._lineEdits[key]
             edit.setValidator(v)
-            result = edit.editingFinished.connect(self._handle_edits, 0x80)
+            #result =
+            edit.editingFinished.connect(lambda sender_key=key: self._handle_edits(sender_key), 0x80)
             
         # have a button selected by default
-        #self._radioButtons[0].setChecked(True)
         self.pose_list.setCurrentRow(0)
-        
-                    
-    def _update(self):
+
+    def update(self):
         if self.isVisible():
-            self._set_help_text()
-            self._hide_buttons()
-            self._update_pages_list()
-            
-            frame = self._wizard.rviz_frames[1]
-            self.verticalLayout.insertWidget(0, frame)
+            frame = self.rviz_frame
+            self.preview_layout.insertWidget(0, frame)
             
             frame.getManager().getRootDisplayGroup().getDisplayAt(1).setValue(True)
             frame.setVisible(True)
             
             self._focus_rviz_view_on_links(frame, '', 'pelvis')
-            self._set_all_alpha_to_one()
+            self._set_all_alpha_to_one(frame)
             self._set_rviz_view(frame, 'Front View')
             self._hide_all_joint_axes(frame)
             
-            self._wizard.show_turning_dir_pub.publish(False)
-
+            self.show_animation.emit(False)
 
 #_________ changes to ui __________________________________________________________________________
 
-    def _hide_buttons(self):
-        self._wizard.walking_module_group.setVisible(False)
-        self._wizard.line_2.setVisible(False)
-        self._wizard.enable_all_rviz_check.setVisible(False)
-        self._wizard.line_3.setVisible(False)
-        self._wizard.finish_button.setVisible(False)
+    def _setupCustomTab(self, joint_overview):
+        self.customTab = TabWidget()
+        label_dicts = self.customTab.setup_tab_widget(joint_overview, 1, False)
+        self._lineEdits = label_dicts[0]
         
-    def _add_labels_and_edits_to_tab(self):
-        self._lineEdits = {}
+        self.customTab.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        
+        self.page_layout.addWidget(self.customTab, 0, 1, Qt.AlignTop)
+        
+        for key in self._lineEdits.keys():
+            edit = self._lineEdits[key]
+            edit.setReadOnly(False)
 
-        arm_counter_left = 1
-        arm_counter_right = 1
-        leg_counter_left = 1
-        leg_counter_right = 1
-        other_counter = 0
-        
-        self.customTab.widget(0).layout().addWidget(QLabel('<b>Left [deg]:</b>'), 0, 0)
-        self.customTab.widget(0).layout().addWidget(QLabel('<b>Right [deg]:</b>'), 0, 4)
-        self.customTab.widget(1).layout().addWidget(QLabel('<b>Left [deg]:</b>'), 0, 0)
-        self.customTab.widget(1).layout().addWidget(QLabel('<b>Right [deg]:</b>'), 0, 4)
-        
-        groups = self._sort_joints_by_group()
-                                       
-        for g in self._wizard.page_config['groups']:
-            #joint = self._wizard.page_config[key]
-            group = groups[g]
-            arm, leg, left, right = False, False, False, False
-            for i in range(len(group)):
-                name = group[i]
-                arm, leg, left, right = self._position_from_joint_name(name)
-                
-                label = QLabel(str(group[i]))
-                edit = QLineEdit()
-                edit.setMaximumWidth(80)
-                
-                self._lineEdits[name] = edit
-                
-                if arm and left:
-                    self._add_label_and_edit(label, edit, 0, arm_counter_left, 0)
-                    arm_counter_left += 1
-                elif arm and right:
-                    self._add_label_and_edit(label, edit, 0, arm_counter_right, 4)
-                    arm_counter_right += 1
-                elif leg and left:
-                    self._add_label_and_edit(label, edit, 1, leg_counter_left, 0)
-                    leg_counter_left += 1
-                elif leg and right:
-                    self._add_label_and_edit(label, edit, 1, leg_counter_right, 4)
-                    leg_counter_right += 1
-                else:
-                    self._add_label_and_edit(label, edit, 2, other_counter, 0)
-                    other_counter += 1
-                    
-            line = self._make_line(QFrame.HLine)
-            
-            if arm and left:
-                self.customTab.widget(0).layout().addWidget(line, arm_counter_left, 0, 1, 2)
-                arm_counter_left += 1
-            elif arm and right:
-                self.customTab.widget(0).layout().addWidget(line, arm_counter_right, 4, 1, 2)
-                arm_counter_right += 1
-            elif leg and left:
-                self.customTab.widget(1).layout().addWidget(line, leg_counter_left, 0, 1, 2)
-                leg_counter_left += 1
-            elif leg and right:
-                self.customTab.widget(1).layout().addWidget(line, leg_counter_right, 4, 1, 2)
-                leg_counter_right += 1
-            else:
-                self.customTab.widget(2).layout().addWidget(line, other_counter, 0, 1, 2)
-                other_counter += 1
-        
-        line = self._make_line(QFrame.VLine)
-        self.customTab.widget(0).layout().addWidget(line, 0, 3, arm_counter_left, 2)
-        line2 = self._make_line(QFrame.VLine)
-        self.customTab.widget(1).layout().addWidget(line2, 0, 3, leg_counter_left, 2)
-        
-        self._add_spacers()
-
-    def _add_label_and_edit(self, label, edit, tab_num, row, column_start):
-        self.customTab.widget(tab_num).layout().addWidget(label, row, column_start)
-        self.customTab.widget(tab_num).layout().addWidget(edit, row, column_start + 1)
-
-    def _add_spacers(self):
-        self.customTab.widget(0).layout().addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
-        self.customTab.widget(0).layout().addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 6)
-        self.customTab.widget(1).layout().addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
-        self.customTab.widget(1).layout().addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 6)
-        self.customTab.widget(2).layout().addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
-        self.customTab.widget(2).layout().addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 6)
-    
     def _add_poses_to_list(self):
-        self.poses['Custom'] = copy.deepcopy(self.poses[self.poses.keys()[0]])
-                
         for key in sorted(self.poses.keys()):
             self.pose_list.addItem(str(key))
-        
-#_______ rviz functions ___________________________________________________________________________
-
-    def _set_all_alpha_to_one(self):
-        robot_display = self._get_robot_state_display(self._wizard.rviz_frames[1])
-        
-        links = robot_display.subProp('Links')
-        
-        for i in range(0, links.numChildren()):
-            # a link has several properties, using this to exclude options
-            if links.childAt(i).getName().find('link') != -1:        
-                links.childAt(i).subProp('Alpha').setValue(1.0)
-        
 
 #_______ button functions _________________________________________________________________________
 
     def _handle_reload_file_button(self):
         current_selection = self.pose_list.currentItem().text()
-        
         self.poses = self._load_calibration_poses()
         
         self.pose_list.clear()
         self._add_poses_to_list()
-        
+
         something_selected = False
         for i in range(self.pose_list.count()):
             if self.pose_list.item(i).text() == current_selection:
                 self.pose_list.setCurrentRow(i)
                 something_selected = True
-        
+
         if not something_selected:
             self.pose_list.setCurrentRow(0)
 
-    def _handle_pages_list_changed(self):
+    def _handle_pose_list_changed(self):
         current_selection = self.pose_list.currentItem()
         if current_selection == None:
             return
@@ -219,62 +123,35 @@ class PosePage(Page):
         for key in self.poses[current_selection].keys():
             self._lineEdits[key].setText(str(self.poses[current_selection][key]))
             
-        self._wizard.pose = copy.deepcopy(self.poses[current_selection])
-        self._send_preview_pose_to_joint_state_publisher()
+            
+        self.pose_changed.emit(self.poses[current_selection])
 
     # for functionality of a custom pose setting       
-    def _handle_edits(self):
-        limits = self._wizard.joint_limits
+    def _handle_edits(self, sender_key):
+        limits = self.joint_limits
 
-        for key in self._lineEdits.keys():
-            edit = self._lineEdits[key]
-            edit.clearFocus()
-            
-            editString = edit.text()
-            valid, value = self._string_to_float(editString)
-            if value != self.poses['Custom'][key]:
-                if valid == True:
-                    upper_limit = limits[key]['max']
-                    lower_limit = limits[key]['min']
-                    if math.radians(value) > upper_limit:
-                        value = round(math.degrees(upper_limit), 2)
-                        print(str(key) + ' has an upper limit of ' + str(value) + ' degrees!')
-                    elif math.radians(value) < lower_limit:
-                        value = round(math.degrees(lower_limit), 2)
-                        print(str(key) + ' has a lower limit of ' + str(value) + ' degrees!')
-                    self.poses['Custom'][key] = value
-                else:
-                    value = self.poses['Custom'][key]
-                    
-                edit.setText(str(value))
+        edit = self._lineEdits[sender_key]
+        edit.clearFocus()
+
+        editString = edit.text()
+        valid, value = self._string_to_float(editString)
+        if value != self.poses['Custom'][sender_key]:
+            if valid:
+                upper_limit = limits[sender_key]['max']
+                lower_limit = limits[sender_key]['min']
+                if math.radians(value) > upper_limit:
+                    value = round(math.degrees(upper_limit), 2)
+                    print(str(sender_key) + ' has an upper limit of ' + str(value) + ' degrees!')
+                elif math.radians(value) < lower_limit:
+                    value = round(math.degrees(lower_limit), 2)
+                    print(str(sender_key) + ' has a lower limit of ' + str(value) + ' degrees!')
+                self.poses['Custom'][sender_key] = value
+            else:
+                value = self.poses['Custom'][sender_key]
+
+            edit.setText(str(value))
                 
-        self._wizard.pose = copy.deepcopy(self.poses['Custom'])
-        self._send_preview_pose_to_joint_state_publisher()
-        
-# ____________________ message function _______________________________________________________________________________
-
-    def _send_preview_pose_to_joint_state_publisher(self):
-        msg = self._generate_joint_state_message()
-        self._wizard.preview_pose_pub.publish(msg)
-
-    def _generate_joint_state_message(self):
-        limits = self._wizard.joint_limits
-        msg = JointState()
-        
-        for joint in self._wizard.pose:
-            upper_limit = limits[joint]['max']
-            lower_limit = limits[joint]['min']      
-            
-            value = math.radians(self._wizard.pose[joint])
-            if value > upper_limit:
-                value = upper_limit
-            elif value < lower_limit:
-                value = lower_limit
-                
-            msg.position.append(value)
-            msg.name.append(joint) 
-            
-        return msg
+        self.pose_changed.emit(self.poses['Custom'])
         
 # ____________________ helper functions ________________________________________________________________________________
 
@@ -287,9 +164,11 @@ class PosePage(Page):
 
     def _load_calibration_poses(self):
         rp = rospkg.RosPack()
-        poses_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', 'calibration_poses.yaml')  
+        poses_path = os.path.join(rp.get_path('thor_mang_calibration'), 'resource', 'config', 'pose_config.yaml')  
         f = open(poses_path, 'r')
         poses = load(f)
         f.close()
+        
+        poses['Custom'] = copy.deepcopy(poses[poses.keys()[0]])
         
         return poses

@@ -4,31 +4,36 @@ import math
 import rospy
 import signal
 import sys
+import time
 import xml.dom.minidom
 
+from rosgraph_msgs.msg import Clock
 from std_msgs.msg import Bool, String
 from sensor_msgs.msg import JointState
 
 class JointStatePublisher:
+        
     def __init__(self):
         robot_description = rospy.get_param('robot_description')
         self._robot = xml.dom.minidom.parseString(robot_description).getElementsByTagName('robot')[0]
         self._joint_names, self._joint_limits = self._get_joints_information_from_robot()
         
-        self._hz = 10
+        self._hz = 100
         if rospy.has_param('rate'):
             self._hz = rospy.get_param('rate')
         
-        self._turning_speed = 5.0
+        self._turning_speed = 2.0
         if rospy.has_param('preview_turning_speed'):
             self._turning_speed = rospy.get_param('preview_turning_speed')
         
         print('calibration/joint_state_publisher: updating with ' + str(self._hz) + 
             ' Hz and using a turning speed of ' + str(self._turning_speed) + ' deg/s')
         
-        self._angle_difference = math.radians(self._turning_speed / self._hz)
+        self._turning_speed = math.radians(self._turning_speed)
+        
+        self._angle_difference = self._turning_speed / self._hz
 
-        self._turning_range = math.radians(20)
+        self._turning_range = math.radians(40)
         
         self._preview_pose = self._set_zero_pose(self._joint_names)
         self._show_turning_direction = False
@@ -40,26 +45,37 @@ class JointStatePublisher:
         self._joint_state_message.position.extend([0] * len(self._joint_names))
         #self._joint_state_message.velocity.extend([0] * len(self._joint_names))
         
+        self._done_with_function = True
+        
         self.preview_pose_sub = rospy.Subscriber("preview_pose", JointState, self._receive_preview_pose)
         self.show_turning_dir_sub = rospy.Subscriber("show_joint_turning_direction", Bool, self._receive_show_turning_dir) 
         self.turning_joint_sub = rospy.Subscriber("turning_joint", String, self._receive_turning_joint)
         
         self.publisher = rospy.Publisher('joint_states', JointState, queue_size = 10)
         
-        #rospy.on_shutdown(self._shutdown)
-        
+
     def _receive_preview_pose(self, data):
         for i in range(0, len(data.name)):
             self._preview_pose[data.name[i]] = data.position[i]
             
+
     def _receive_show_turning_dir(self, data):
         self._show_turning_direction = data.data
         
+
     def _receive_turning_joint(self, data):
         self._preview_pose_to_position()
         self._turning_joint = data.data
         self._turning_joint_old_position = self._preview_pose[self._turning_joint]
         
+        max_val = self._preview_pose[self._turning_joint] + self._turning_range / 2.0
+        min_val = self._preview_pose[self._turning_joint] - self._turning_range / 2.0
+        
+        max_val, min_val = self._adjust_animation_range_to_joint_limits(max_val, min_val, self._turning_joint)
+        
+        self._max_val = max_val
+        self._min_val = min_val
+
         
     def _get_joints_information_from_robot(self):
         joint_names = []
@@ -80,6 +96,7 @@ class JointStatePublisher:
                 
         return joint_names, joint_limits
         
+        
     def _set_zero_pose(self, joint_names):
         zero_pose = {}
         for name in joint_names:
@@ -87,32 +104,34 @@ class JointStatePublisher:
             
         return zero_pose
         
+        
     def _preview_pose_to_position(self):
         for i in range(0, len(self._joint_state_message.name)):
             name = self._joint_state_message.name[i]
             if name in self._preview_pose.keys():
                 self._joint_state_message.position[i] = self._preview_pose[name]
         
-    def _turn_joints(self):
+        
+    def _turn_joints(self, time_old):
         for i in range(0, len(self._joint_state_message.name)):
             name = self._joint_state_message.name[i]
             if name == self._turning_joint:
-                current_position = self._joint_state_message.position[i] 
-                self._joint_state_message.position[i] = self._calculate_new_position(name, i)
-                self._turning_joint_old_position = current_position
+                time_now, self._joint_state_message.position[i] = self._calculate_new_position(name, i, time_old)
+                self._turning_joint_old_position = self._joint_state_message.position[i]
+                return time_now
+        return time_now
         
-    def _calculate_new_position(self, joint, i):
-        max_val = self._preview_pose[joint] + self._turning_range / 2.0
-        min_val = self._preview_pose[joint] - self._turning_range / 2.0
         
-        max_val, min_val = self._adjust_animation_range_to_joint_limits(max_val, min_val, joint)
+    def _calculate_new_position(self, joint, i, time_old):
+        time_now = time.time()
+
+        new_val = self._turning_joint_old_position + self._turning_speed * (time_now - time_old)
         
-        new_val = self._turning_joint_old_position + self._angle_difference
-        
-        if new_val >= max_val:
-            new_val = min_val
+        if new_val > self._max_val:
+            new_val = self._min_val
             
-        return new_val
+        return time_now, new_val
+        
         
     def _adjust_animation_range_to_joint_limits(self, max_val, min_val, joint):
         upper_limit = self._joint_limits[joint]['max']
@@ -142,19 +161,32 @@ class JointStatePublisher:
             
         return max_val, min_val
         
+        
     def loop(self):
         r = rospy.Rate(self._hz)
+        time_now = 0
+        count = 0
         while not rospy.is_shutdown():
-            self._joint_state_message.header.stamp = rospy.Time.now()
-            
-            # do other stuff here
-            if self._show_turning_direction:
-                self._turn_joints()
-            else:
-                self._preview_pose_to_position()
-            
-            self.publisher.publish(self._joint_state_message)
+            if self._done_with_function:
+                self._done_with_function = False
+                self._joint_state_message.header.stamp = rospy.Time.now()
+                
+                # do other stuff here
+                if self._show_turning_direction:
+                    time_now = self._turn_joints(time_now)
+                else:
+                    self._preview_pose_to_position()
+                    time_now = time.time()
+                
+                self.publisher.publish(self._joint_state_message)
+
+                count += 1
+                #if count % 60 == 0:
+                #    print('debug: joint state publisher is publishing (every 60th publication)')
+
+                self._done_with_function = True
             r.sleep()
+
 
         
 if __name__ == '__main__':

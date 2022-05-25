@@ -1,10 +1,17 @@
 <launch>
-    <arg name="preview_turning_speed" default="5.0"/>
-    <arg name="rate" default="10"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="preview_turning_speed" default="2.0"/>
+    <arg name="rate" default="60"/>
+    
+    <!-- for testing auto calibration without real checkerboard images, set to FALSE for real checkerboard -->
+    <arg name="generate_test_data" default="true"/>
+    
     <group ns="johnny5">
         <include file="$(find thor_mang_calibration)/launch/calibration.launch">
+            <arg name="use_sim_time" value="$(arg use_sim_time)"/>
             <arg name="preview_turning_speed" value="$(arg preview_turning_speed)"/>
             <arg name="rate" value="$(arg rate)"/>
+            <arg name="generate_test_data" value="$(arg generate_test_data)"/>
         </include>
     </group>
 </launch>
